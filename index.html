@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Retiro de Catequistas 2026 - Parroquia San Martín de Porres</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- SDK de Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <style>
+        .capitalized-text { text-transform: capitalize; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 9999px; }
+        .bg-guindo { background-color: #6a1b29; }
+        .hover\:bg-guindo:hover { background-color: #55141f; }
+        .text-guindo { color: #6a1b29; }
+        .border-guindo { border-color: #6a1b29; }
+        .focus\:ring-guindo:focus { --tw-ring-color: #6a1b29; }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 font-sans antialiased min-h-screen flex flex-col pb-24">
+
+    <!-- LOGIN DE ADMINISTRADOR -->
+    <div id="modal-login" class="fixed inset-0 bg-slate-950/70 backdrop-blur-md hidden flex items-center justify-center p-4 z-50 transition-all">
+        <div class="bg-white rounded-[2.5rem] p-8 max-w-sm w-full shadow-2xl space-y-6 border border-slate-100 text-center transform scale-100">
+            <div class="w-20 h-20 bg-gradient-to-tr from-[#6a1b29] to-[#882435] text-amber-300 rounded-3xl mx-auto flex items-center justify-center text-3xl shadow-xl shadow-rose-900/20 overflow-hidden border-2 border-white">
+                <img src="logo.png" alt="Logo" onerror="this.onerror=null;this.src='https://cdn-icons-png.flaticon.com/512/330/330447.png';" class="w-full h-full object-cover">
+            </div>
+            <div>
+                <h3 class="text-xl font-black text-slate-900 tracking-tight">Acceso de Coordinación</h3>
+                <p class="text-xs text-slate-500 mt-1 leading-relaxed">Ingresa la contraseña de administrador (<code class="bg-slate-100 px-1.5 py-0.5 rounded text-guindo font-bold">confir2026</code>) para habilitar permisos.</p>
+            </div>
+            <form onsubmit="validarLoginAdmin(event)" class="space-y-4 text-left">
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1.5">Contraseña Admin</label>
+                    <div class="relative flex items-center">
+                        <input type="password" id="input-pass-admin" required class="w-full p-3.5 pr-12 rounded-2xl border border-slate-200 outline-none text-sm font-bold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-[#6a1b29] transition" placeholder="••••••••">
+                        <button type="button" onclick="togglePassword()" class="absolute right-4 text-slate-400 hover:text-guindo focus:outline-none transition">
+                            <i id="icono-ojo" class="fa-solid fa-eye text-base"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="flex space-x-3 pt-2">
+                    <button type="button" onclick="cancelarLogin()" class="w-1/2 bg-slate-100 text-slate-600 font-bold py-3.5 rounded-2xl hover:bg-slate-200 transition text-xs shadow-sm">Cancelar</button>
+                    <button type="submit" class="w-1/2 bg-guindo hover:bg-guindo text-white font-bold py-3.5 rounded-2xl transition shadow-lg shadow-rose-900/30 text-xs">Ingresar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- HEADER PREMIUM -->
+    <header class="bg-gradient-to-r from-[#4d131e] via-[#6a1b29] to-slate-900 text-white shadow-2xl sticky top-0 z-40 border-b border-rose-950/40">
+        <div class="max-w-7xl mx-auto px-6 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="flex items-center space-x-4">
+                <div class="w-12 h-12 rounded-2xl bg-white/10 flex items-center justify-center backdrop-blur-md text-amber-300 text-xl font-bold border border-white/20 overflow-hidden shadow-inner">
+                    <img id="img-logo-parroquia" src="logo.png" alt="Logo" onerror="this.onerror=null;this.src='https://cdn-icons-png.flaticon.com/512/330/330447.png';" class="w-full h-full object-cover">
+                </div>
+                <div>
+                    <h1 class="text-base sm:text-lg font-black tracking-tight flex items-center gap-2">Retiro de Catequistas 2026 <span class="text-[10px] bg-amber-400 text-slate-950 px-2 py-0.5 rounded-full font-extrabold uppercase shadow-sm">San Martín de Porres</span></h1>
+                    <p class="text-xs text-rose-100 font-medium">Panel Colaborativo en Tiempo Real (Firebase)</p>
+                </div>
+            </div>
+            
+            <div class="flex flex-wrap items-center gap-3">
+                <div class="flex items-center space-x-2 bg-white/10 backdrop-blur-md px-4 py-2 rounded-2xl border border-white/20 shadow-sm">
+                    <span class="text-xs font-bold text-rose-200">MODO:</span>
+                    <select id="select-rol" onchange="cambiarRolSistema()" class="bg-[#4d131e] text-white font-bold text-xs px-3 py-1.5 rounded-xl border border-rose-800 outline-none cursor-pointer focus:ring-2 focus:ring-amber-400">
+                        <option value="catequista">Catequista (Mi Grupo)</option>
+                        <option value="admin">Coordinador / Admin</option>
+                    </select>
+                </div>
+                <div id="contenedor-selector-grupo" class="flex items-center space-x-2 bg-white/10 backdrop-blur-md px-4 py-2 rounded-2xl border border-white/20 shadow-sm">
+                    <span class="text-xs font-bold text-rose-200">GRUPO:</span>
+                    <select id="select-grupo" onchange="renderizarTodo()" class="bg-[#4d131e] text-white font-bold text-xs px-3 py-1.5 rounded-xl border border-rose-800 outline-none cursor-pointer focus:ring-2 focus:ring-amber-400">
+                        <option value="1">Grupo 1</option>
+                        <option value="2">Grupo 2</option>
+                        <option value="3" selected>Grupo 3</option>
+                        <option value="4">Grupo 4</option>
+                        <option value="5">Grupo 5</option>
+                        <option value="6">Grupo 6</option>
+                        <option value="7">Grupo 7</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        
+        <!-- PESTAÑAS -->
+        <div class="max-w-7xl mx-auto px-6 flex overflow-x-auto space-x-2.5 pb-4 pt-2">
+            <button onclick="switchTab('salud')" id="btn-salud" class="tab-btn px-5 py-3 rounded-2xl text-xs font-bold transition-all duration-200 flex items-center space-x-2.5 bg-white text-[#6a1b29] shadow-lg whitespace-nowrap">
+                <i class="fa-solid fa-heart-pulse text-rose-600 text-sm"></i><span>Jóvenes y Salud</span>
+            </button>
+            <button onclick="switchTab('pagos')" id="btn-pagos" class="tab-btn px-5 py-3 rounded-2xl text-xs font-bold transition-all duration-200 flex items-center space-x-2.5 text-rose-100 hover:bg-white/10 whitespace-nowrap">
+                <i class="fa-solid fa-wallet text-emerald-400 text-sm"></i><span>Cobros y Precios</span>
+            </button>
+            <button onclick="switchTab('comisiones')" id="btn-comisiones" class="tab-btn px-5 py-3 rounded-2xl text-xs font-bold transition-all duration-200 flex items-center space-x-2.5 text-rose-100 hover:bg-white/10 whitespace-nowrap">
+                <i class="fa-solid fa-users-gear text-amber-400 text-sm"></i><span>Comisiones</span>
+            </button>
+            <button onclick="switchTab('expositores')" id="btn-expositores" class="tab-btn px-5 py-3 rounded-2xl text-xs font-bold transition-all duration-200 flex items-center space-x-2.5 text-rose-100 hover:bg-white/10 whitespace-nowrap">
+                <i class="fa-solid fa-chalkboard-user text-rose-300 text-sm"></i><span>Expositores</span>
+            </button>
+            <button onclick="switchTab('gastos')" id="btn-gastos" class="tab-btn px-5 py-3 rounded-2xl text-xs font-bold transition-all duration-200 flex items-center space-x-2.5 text-rose-100 hover:bg-white/10 whitespace-nowrap">
+                <i class="fa-solid fa-chart-pie text-sky-400 text-sm"></i><span>Caja y Gastos</span>
+            </button>
+            <button onclick="switchTab('cronograma')" id="btn-cronograma" class="tab-btn px-5 py-3 rounded-2xl text-xs font-bold transition-all duration-200 flex items-center space-x-2.5 text-rose-100 hover:bg-white/10 whitespace-nowrap">
+                <i class="fa-solid fa-clock text-amber-300 text-sm"></i><span>Cronograma Vivo</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <main class="max-w-7xl mx-auto px-6 py-8 flex-grow w-full space-y-6">
+
+        <!-- SALUD Y DIFUSIÓN -->
+        <section id="tab-salud" class="tab-content space-y-6">
+            <div id="panel-avisos-masivos" class="hidden bg-gradient-to-r from-[#4d131e] via-[#6a1b29] to-slate-900 text-white p-7 rounded-[2.5rem] shadow-xl flex flex-col md:flex-row justify-between items-center gap-4 border border-rose-800/40">
+                <div class="space-y-1">
+                    <span class="bg-amber-400 text-slate-950 text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-wider shadow-sm">Panel Exclusivo Admin</span>
+                    <h3 class="text-lg font-black tracking-tight">Difusión Masiva a Papás por WhatsApp</h3>
+                    <p class="text-xs text-rose-200">Envía avisos oficiales de llegada o salida a los tutores de manera instantánea.</p>
+                </div>
+                <div class="flex flex-wrap gap-2.5">
+                    <button onclick="enviarMasivo('llegada')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-5 py-3 rounded-2xl text-xs shadow-lg transition flex items-center gap-2 transform active:scale-95">
+                        <i class="fa-brands fa-whatsapp text-sm"></i> Difusión de Llegada
+                    </button>
+                    <button onclick="enviarMasivo('salida')" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-5 py-3 rounded-2xl text-xs shadow-lg transition flex items-center gap-2 transform active:scale-95">
+                        <i class="fa-brands fa-whatsapp text-sm"></i> Difusión de Salida
+                    </button>
+                </div>
+            </div>
+
+            <div class="bg-white p-7 rounded-[2.5rem] shadow-sm border border-slate-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                <div>
+                    <h2 id="titulo-salud" class="text-xl font-black text-slate-900 tracking-tight">Ficha Médica y Medicamentos</h2>
+                    <p class="text-xs text-slate-500 font-medium">Control estricto de alergias y horarios exactos con selector de reloj.</p>
+                </div>
+                <button onclick="abrirModal('modal-joven')" class="bg-guindo text-white font-bold px-6 py-3.5 rounded-2xl text-xs shadow-xl shadow-rose-900/20 transition-all flex items-center space-x-2 transform active:scale-95">
+                    <i class="fa-solid fa-user-plus text-sm"></i><span>+ Agregar Joven</span>
+                </button>
+            </div>
+            <div class="bg-white rounded-[2.5rem] shadow-sm border border-slate-200 overflow-hidden p-3">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse text-xs">
+                        <thead class="bg-slate-50/80 text-slate-500 font-bold border-b border-slate-100">
+                            <tr>
+                                <th class="p-4">Participante</th>
+                                <th class="p-4">Alergias</th>
+                                <th class="p-4">Medicamento y Horarios</th>
+                                <th class="p-4">Contacto de Emergencia (WhatsApp)</th>
+                                <th id="col-header-acciones" class="p-4 text-center hidden">Acciones (Admin)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabla-jovenes-body" class="divide-y divide-slate-100"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- PAGOS -->
+        <section id="tab-pagos" class="tab-content hidden space-y-6">
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+                <div class="bg-white p-6 rounded-[2.5rem] shadow-sm border border-slate-200 flex justify-between items-center">
+                    <div>
+                        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Costo Base por Joven</p>
+                        <p id="label-costo-base" class="text-3xl font-black text-slate-900 mt-1">80.00 Bs</p>
+                    </div>
+                    <button id="btn-editar-precio" onclick="abrirModal('modal-precio')" class="hidden bg-rose-50 text-guindo p-3 rounded-2xl text-xs font-bold hover:bg-rose-100 transition shadow-sm"><i class="fa-solid fa-pen"></i> Editar</button>
+                </div>
+                <div class="bg-white p-6 rounded-[2.5rem] shadow-sm border border-slate-200">
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Recaudado</p>
+                    <p id="stat-recaudado" class="text-3xl font-black text-emerald-600 mt-1">0.00 Bs</p>
+                </div>
+                <div class="bg-white p-6 rounded-[2.5rem] shadow-sm border border-slate-200">
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Saldo Pendiente Global</p>
+                    <p id="stat-pendiente" class="text-3xl font-black text-amber-600 mt-1">0.00 Bs</p>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-[2.5rem] shadow-sm border border-slate-200 p-7 space-y-6">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h2 id="titulo-pagos" class="text-xl font-black text-slate-900 tracking-tight">Control Detallado de Cobros</h2>
+                        <p class="text-xs text-slate-500 font-medium">Abonos parciales y actualización de saldos en tiempo real.</p>
+                    </div>
+                    <button onclick="abrirModal('modal-abono')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-6 py-3.5 rounded-2xl text-xs shadow-xl shadow-emerald-200 transition transform active:scale-95">+ Registrar Abono</button>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse text-xs">
+                        <thead class="bg-slate-50/80 text-slate-500 font-bold border-b border-slate-100">
+                            <tr>
+                                <th class="p-4">Participante</th>
+                                <th class="p-4">Historial de Abonos</th>
+                                <th class="p-4">Pagado</th>
+                                <th class="p-4">Pendiente</th>
+                                <th class="p-4 text-center">Estado</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabla-pagos-body" class="divide-y divide-slate-100"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- COMISIONES -->
+        <section id="tab-comisiones" class="tab-content hidden space-y-6">
+            <div class="bg-white p-7 rounded-[2.5rem] shadow-sm border border-slate-200 flex justify-between items-center">
+                <div>
+                    <h2 class="text-xl font-black text-slate-900 tracking-tight">Comisiones y Encargados</h2>
+                    <p class="text-xs text-slate-500 font-medium">Asignación de equipos de trabajo del retiro.</p>
+                </div>
+                <button id="btn-nueva-comision" onclick="abrirModal('modal-comision')" class="hidden bg-amber-600 hover:bg-amber-700 text-white font-bold px-6 py-3.5 rounded-2xl text-xs shadow-xl shadow-amber-200 transition transform active:scale-95">+ Nueva Comisión</button>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6" id="grid-comisiones"></div>
+        </section>
+
+        <!-- EXPOSITORES -->
+        <section id="tab-expositores" class="tab-content hidden space-y-6">
+            <div class="bg-white p-7 rounded-[2.5rem] shadow-sm border border-slate-200 flex justify-between items-center">
+                <div>
+                    <h2 class="text-xl font-black text-slate-900 tracking-tight">Expositores del Retiro</h2>
+                    <p class="text-xs text-slate-500 font-medium">Directorio de ponentes y charlas magistrales.</p>
+                </div>
+                <button id="btn-nuevo-expositor" onclick="abrirModal('modal-expositor')" class="hidden bg-guindo text-white font-bold px-6 py-3.5 rounded-2xl text-xs shadow-xl shadow-rose-900/20 transition transform active:scale-95">+ Agregar Expositor</button>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="grid-expositores"></div>
+        </section>
+
+        <!-- GASTOS -->
+        <section id="tab-gastos" class="tab-content hidden space-y-6">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="bg-[#4d131e] text-white p-7 rounded-[2.5rem] space-y-4 shadow-xl">
+                    <h3 class="font-bold text-base flex items-center space-x-2"><i class="fa-solid fa-handshake-angle text-amber-300"></i><span>Regla de Hospedaje</span></h3>
+                    <p class="text-xs text-rose-100 leading-relaxed">Hospedaje de 84 personas a 15 Bs cubierto por patrocinador externo.</p>
+                    <div class="bg-white/10 p-4 rounded-2xl border border-white/20 flex justify-between text-xs font-bold">
+                        <span>Ahorro Estimado:</span><span class="text-emerald-400 text-sm">1,260.00 Bs</span>
+                    </div>
+                </div>
+                <div class="bg-white p-7 rounded-[2.5rem] shadow-sm border border-slate-200 space-y-4 lg:col-span-2">
+                    <div class="flex justify-between items-center">
+                        <h3 class="font-bold text-slate-900 text-lg">Control de Caja y Gastos</h3>
+                        <div id="controles-gastos-admin" class="hidden flex space-x-2">
+                            <button onclick="abrirModal('modal-gasto')" class="bg-amber-600 hover:bg-amber-700 text-white font-bold px-5 py-3 rounded-2xl text-xs shadow-md transition">+ Gasto</button>
+                            <button onclick="ponerCeroGastos()" class="bg-rose-100 text-rose-700 font-bold px-5 py-3 rounded-2xl text-xs transition">Poner en Cero</button>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse text-xs">
+                            <thead class="bg-slate-50/80 text-slate-500 font-bold border-b border-slate-100">
+                                <tr>
+                                    <th class="p-3.5">Categoría</th>
+                                    <th class="p-3.5">Descripción</th>
+                                    <th class="p-3.5">Monto</th>
+                                    <th id="col-header-gasto-accion" class="p-3.5 text-center hidden">Acción</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabla-gastos-body" class="divide-y divide-slate-100"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- CRONOGRAMA VIVO -->
+        <section id="tab-cronograma" class="tab-content hidden space-y-6">
+            <div class="bg-white p-7 rounded-[2.5rem] shadow-sm border border-slate-200 flex justify-between items-center">
+                <div>
+                    <h2 class="text-xl font-black text-slate-900 tracking-tight">Cronograma del Retiro en Vivo</h2>
+                    <p class="text-xs text-slate-500 font-medium">Selección de horarios y checklist en tiempo real.</p>
+                </div>
+                <button id="btn-nueva-actividad" onclick="abrirModal('modal-actividad')" class="hidden bg-guindo text-white font-bold px-6 py-3.5 rounded-2xl text-xs shadow-xl shadow-rose-900/20 transition transform active:scale-95">+ Nueva Actividad</button>
+            </div>
+            <div class="space-y-4" id="lista-cronograma"></div>
+        </section>
+
+    </main>
+
+    <!-- MODALES -->
+    <div id="modal-joven" class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-[2.5rem] p-8 max-w-md w-full shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto text-xs">
+            <h3 class="text-lg font-black text-slate-900">Registrar Nuevo Joven</h3>
+            <form onsubmit="guardarJoven(event)" class="space-y-3">
+                <div><label class="block font-bold text-slate-700 mb-1">Nombre Completo</label><input type="text" id="j-nombre" required class="capitalized-text w-full p-3.5 rounded-2xl border border-slate-200 outline-none font-medium focus:ring-2 focus:ring-[#6a1b29]" placeholder="Ej. Mateo Benítez"></div>
+                <div><label class="block font-bold text-slate-700 mb-1">Condición Médica / Alergias</label><input type="text" id="j-alergia" class="capitalized-text w-full p-3.5 rounded-2xl border border-slate-200 outline-none focus:ring-2 focus:ring-[#6a1b29]" placeholder="Ej. Asma leve"></div>
+                
+                <div class="bg-rose-50/50 p-4 rounded-2.5rem border border-rose-100 space-y-2">
+                    <label class="block font-bold text-guindo">Control de Medicamentos</label>
+                    <input type="text" id="j-med" class="capitalized-text w-full p-3 rounded-xl border border-slate-200 bg-white outline-none focus:ring-2 focus:ring-[#6a1b29]" placeholder="Nombre del medicamento">
+                    <select id="j-dosis" onchange="generarRelojHorasMed()" class="w-full p-3 rounded-xl border border-slate-200 bg-white outline-none font-bold focus:ring-2 focus:ring-[#6a1b29]">
+                        <option value="0">Sin medicamento</option>
+                        <option value="1">1 toma al día</option>
+                        <option value="2">2 tomas al día</option>
+                        <option value="3">3 tomas al día</option>
+                    </select>
+                    <div id="reloj-horas-med" class="space-y-1.5 pt-1"></div>
+                </div>
+
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1">Contacto de Emergencia (Nombre y WhatsApp)</label>
+                    <div class="grid grid-cols-2 gap-2">
+                        <input type="text" id="j-contacto" required class="capitalized-text w-full p-3.5 rounded-2xl border border-slate-200 outline-none focus:ring-2 focus:ring-[#6a1b29]" placeholder="Nombre Tutor">
+                        <input type="tel" id="j-celular" required class="w-full p-3.5 rounded-2xl border border-slate-200 outline-none font-bold text-guindo focus:ring-2 focus:ring-[#6a1b29]" placeholder="Ej. 72948392">
+                    </div>
+                </div>
+                <div class="flex space-x-2 pt-3">
+                    <button type="button" onclick="cerrarModal('modal-joven')" class="w-1/2 bg-slate-100 py-3.5 rounded-2xl font-bold hover:bg-slate-200 transition">Cancelar</button>
+                    <button type="submit" class="w-1/2 bg-guindo text-white py-3.5 rounded-2xl font-bold shadow-lg shadow-rose-900/30 transition">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="modal-abono" class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-[2.5rem] p-8 max-w-md w-full shadow-2xl space-y-4 text-xs">
+            <h3 class="text-lg font-black text-slate-900">Registrar Abono</h3>
+            <form onsubmit="guardarAbono(event)" class="space-y-3">
+                <div><label class="block font-bold text-slate-700 mb-1">Seleccionar Joven</label><select id="abono-joven" class="w-full p-3.5 rounded-2xl border border-slate-200 outline-none font-medium focus:ring-2 focus:ring-[#6a1b29]"></select></div>
+                <div><label class="block font-bold text-slate-700 mb-1">Monto del Abono (Bs)</label><input type="number" id="abono-monto" required class="w-full p-3.5 rounded-2xl border border-slate-200 outline-none font-bold text-emerald-600 text-sm focus:ring-2 focus:ring-[#6a1b29]" placeholder="Ej. 30"></div>
+                <div><label class="block font-bold text-slate-700 mb-1">Catequista que Recibe</label><input type="text" id="abono-recibe" required class="capitalized-text w-full p-3.5 rounded-2xl border border-slate-200 outline-none focus:ring-2 focus:ring-[#6a1b29]" placeholder="Nombre titular"></div>
+                <div class="flex space-x-2 pt-3">
+                    <button type="button" onclick="cerrarModal('modal-abono')" class="w-1/2 bg-slate-100 py-3.5 rounded-2xl font-bold hover:bg-slate-200 transition">Cancelar</button>
+                    <button type="submit" class="w-1/2 bg-emerald-600 text-white py-3.5 rounded-2xl font-bold shadow-lg shadow-emerald-200 hover:bg-emerald-700 transition">Actualizar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="modal-comision" class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-[2.5rem] p-8 max-w-md w-full shadow-2xl space-y-4 text-xs">
+            <h3 class="text-lg font-black text-slate-900">Nueva Comisión</h3>
+            <form onsubmit="guardarComision(event)" class="space-y-3">
+                <div><label class="block font-bold text-slate-700 mb-1">Nombre Comisión</label><input type="text" id="com-nombre" required class="capitalized-text w-full p-3.5 rounded-2xl border border-slate-200 outline-none focus:ring-2 focus:ring-[#6a1b29]" placeholder="Ej. Cocina, Sonido"></div>
+                <div><label class="block font-bold text-slate-700 mb-1">Encargados (Separados por coma)</label><input type="text" id="com-encargados" required class="capitalized-text w-full p-3.5 rounded-2xl border border-slate-200 outline-none focus:ring-2 focus:ring-[#6a1b29]" placeholder="Ej. María Rosa, Jorge"></div>
+                <div class="flex space-x-2 pt-3">
+                    <button type="button" onclick="cerrarModal('modal-comision')" class="w-1/2 bg-slate-100 py-3.5 rounded-2xl font-bold hover:bg-slate-200 transition">Cancelar</button>
+                    <button type="submit" class="w-1/2 bg-amber-600 text-white py-3.5 rounded-2xl font-bold shadow-lg shadow-amber-200 hover:bg-amber-700 transition">Crear</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="modal-expositor" class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-[2.5rem] p-8 max-w-md w-full shadow-2xl space-y-4 text-xs">
+            <h3 class="text-lg font-black text-slate-900">Agregar Expositor</h3>
+            <form onsubmit="guardarExpositor(event)" class="space-y-3">
+                <div><label class="block font-bold text-slate-700 mb-1">Nombre Completo</label><input type="text" id="exp-nombre" required class="capitalized-text w-full p-3.5 rounded-2xl border border-slate-200 outline-none font-medium focus:ring-2 focus:ring-[#6a1b29]" placeholder="Ej. Padre Juan Pérez"></div>
+                <div><label class="block font-bold text-slate-700 mb-1">Tema / Charla</label><input type="text" id="exp-tema" required class="capitalized-text w-full p-3.5 rounded-2xl border border-slate-200 outline-none focus:ring-2 focus:ring-[#6a1b29]" placeholder="Ej. El llamado a la conversión"></div>
+                <div><label class="block font-bold text-slate-700 mb-1">Ruta de la Foto (Carpeta D:\RETIRO 2026)</label><input type="text" id="exp-foto" class="w-full p-3.5 rounded-2xl border border-slate-200 outline-none focus:ring-2 focus:ring-[#6a1b29]" placeholder="Ej. expositores/padre_juan.jpg"></div>
+                <div class="flex space-x-2 pt-3">
+                    <button type="button" onclick="cerrarModal('modal-expositor')" class="w-1/2 bg-slate-100 py-3.5 rounded-2xl font-bold hover:bg-slate-200 transition">Cancelar</button>
+                    <button type="submit" class="w-1/2 bg-guindo text-white py-3.5 rounded-2xl font-bold shadow-lg shadow-rose-900/30 transition">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="modal-gasto" class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-[2.5rem] p-8 max-w-md w-full shadow-2xl space-y-4 text-xs">
+            <h3 class="text-lg font-black text-slate-900">Registrar Gasto</h3>
+            <form onsubmit="guardarGasto(event)" class="space-y-3">
+                <div><label class="block font-bold text-slate-700 mb-1">Categoría</label><select id="gas-cat" class="w-full p-3.5 rounded-2xl border border-slate-200 outline-none font-bold focus:ring-2 focus:ring-[#6a1b29]"><option value="Transporte">Transporte</option><option value="Alimentación">Alimentación</option><option value="Hospedaje">Hospedaje</option><option value="Otros">Otros</option></select></div>
+                <div><label class="block font-bold text-slate-700 mb-1">Descripción</label><input type="text" id="gas-desc" required class="capitalized-text w-full p-3.5 rounded-2xl border border-slate-200 outline-none focus:ring-2 focus:ring-[#6a1b29]" placeholder="Descripción del gasto"></div>
+                <div><label class="block font-bold text-slate-700 mb-1">Monto (Bs)</label><input type="number" id="gas-monto" required class="w-full p-3.5 rounded-2xl border border-slate-200 outline-none font-bold text-rose-600 text-sm focus:ring-2 focus:ring-[#6a1b29]" placeholder="Ej. 500"></div>
+                <div class="flex space-x-2 pt-3">
+                    <button type="button" onclick="cerrarModal('modal-gasto')" class="w-1/2 bg-slate-100 py-3.5 rounded-2xl font-bold hover:bg-slate-200 transition">Cancelar</button>
+                    <button type="submit" class="w-1/2 bg-amber-600 text-white py-3.5 rounded-2xl font-bold shadow-lg shadow-amber-200 hover:bg-amber-700 transition">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="modal-actividad" class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-[2.5rem] p-8 max-w-md w-full shadow-2xl space-y-4 text-xs">
+            <h3 class="text-lg font-black text-slate-900">Programar Actividad o Exposición</h3>
+            <form onsubmit="guardarActividad(event)" class="space-y-3">
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block font-bold text-slate-700 mb-1">Hora Inicio</label>
+                        <input type="time" id="act-hora-inicio" required class="w-full p-3.5 rounded-2xl border border-slate-200 outline-none font-bold text-sm focus:ring-2 focus:ring-[#6a1b29]">
+                    </div>
+                    <div>
+                        <label class="block font-bold text-slate-700 mb-1">Hora Fin</label>
+                        <input type="time" id="act-hora-fin" required class="w-full p-3.5 rounded-2xl border border-slate-200 outline-none font-bold text-sm focus:ring-2 focus:ring-[#6a1b29]">
+                    </div>
+                </div>
+                <div><label class="block font-bold text-slate-700 mb-1">Título de la Charla / Actividad</label><input type="text" id="act-titulo" required class="capitalized-text w-full p-3.5 rounded-2xl border border-slate-200 outline-none font-medium focus:ring-2 focus:ring-[#6a1b29]" placeholder="Ej. El llamado de Jesús"></div>
+                <div><label class="block font-bold text-slate-700 mb-1">Expositor / Responsable</label><input type="text" id="act-resp" required class="capitalized-text w-full p-3.5 rounded-2xl border border-slate-200 outline-none focus:ring-2 focus:ring-[#6a1b29]" placeholder="Ej. Padre Juan Pérez"></div>
+                <div class="flex space-x-2 pt-3">
+                    <button type="button" onclick="cerrarModal('modal-actividad')" class="w-1/2 bg-slate-100 py-3.5 rounded-2xl font-bold hover:bg-slate-200 transition">Cancelar</button>
+                    <button type="submit" class="w-1/2 bg-guindo text-white py-3.5 rounded-2xl font-bold shadow-lg shadow-rose-900/30 transition">Programar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="modal-precio" class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-[2.5rem] p-8 max-w-md w-full shadow-2xl space-y-4 text-xs">
+            <h3 class="text-lg font-black text-slate-900">Modificar Costo Base</h3>
+            <form onsubmit="actualizarPrecioBase(event)" class="space-y-3">
+                <div><label class="block font-bold text-slate-700 mb-1">Nuevo Costo por Joven (Bs)</label><input type="number" id="nuevo-precio" required class="w-full p-3.5 rounded-2xl border border-slate-200 outline-none font-bold text-xl text-guindo focus:ring-2 focus:ring-[#6a1b29]" placeholder="80"></div>
+                <div class="flex space-x-2 pt-3">
+                    <button type="button" onclick="cerrarModal('modal-precio')" class="w-1/2 bg-slate-100 py-3.5 rounded-2xl font-bold hover:bg-slate-200 transition">Cancelar</button>
+                    <button type="submit" class="w-1/2 bg-guindo text-white py-3.5 rounded-2xl font-bold shadow-lg shadow-rose-900/30 transition">Actualizar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- SCRIPT DE FIREBASE Y LÓGICA EN TIEMPO REAL -->
+    <script>
+        // CONFIGURACIÓN DE FIREBASE (Reemplaza con tus credenciales del Paso 1 del manual)
+        const firebaseConfig = {
+            apiKey: "TU_API_KEY",
+            authDomain: "tu-proyecto.firebaseapp.com",
+            projectId: "tu-proyecto",
+            storageBucket: "tu-proyecto.appspot.com",
+            messagingSenderId: "TU_SENDER_ID",
+            appId: "TU_APP_ID"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        let costoBase = 80;
+        let baseDatos = {
+            grupos: {
+                3: {
+                    jovenes: [
+                        { nombre: "Carlos Pérez", alergia: "Asma leve", med: "Salbutamol", horas: ["08:00"], contacto: "Juan Pérez", celular: "72948392", pagado: 50, historial: ["50 Bs - Recibió: Juan"] }
+                    ]
+                }
+            },
+            comisiones: [
+                { nombre: "Comisión de Cocina", encargados: ["María Rosa", "Jorge Limachi"] },
+                { nombre: "Logística y Hospedaje", encargados: ["Carlos Mendoza"] }
+            ],
+            expositores: [
+                { nombre: "Padre Juan Pérez", tema: "El valor de la Eucaristía", foto: "expositores/padre_juan.jpg" }
+            ],
+            gastos: [
+                { id: 1, categoria: "Transporte", desc: "Alquiler de bus", monto: 1200 }
+            ],
+            cronograma: [
+                { id: 1, hora: "08:00 - 09:00", titulo: "Recepción e instalación de jóvenes", resp: "Logística", hecho: true }
+            ]
+        };
+
+        function togglePassword() {
+            let inputPass = document.getElementById('input-pass-admin');
+            let iconoOjo = document.getElementById('icono-ojo');
+            if(inputPass.type === "password") {
+                inputPass.type = "text";
+                iconoOjo.className = "fa-solid fa-eye-slash";
+            } else {
+                inputPass.type = "password";
+                iconoOjo.className = "fa-solid fa-eye";
+            }
+        }
+
+        function cambiarRolSistema() {
+            let rol = document.getElementById('select-rol').value;
+            if(rol === 'admin') {
+                abrirModal('modal-login');
+            } else {
+                document.getElementById('btn-editar-precio').classList.add('hidden');
+                document.getElementById('contenedor-selector-grupo').style.display = 'flex';
+                document.getElementById('btn-nueva-comision').classList.add('hidden');
+                document.getElementById('btn-nuevo-expositor').classList.add('hidden');
+                document.getElementById('btn-nueva-actividad').classList.add('hidden');
+                document.getElementById('controles-gastos-admin').classList.add('hidden');
+                document.getElementById('panel-avisos-masivos').classList.add('hidden');
+                renderizarTodo();
+            }
+        }
+
+        function validarLoginAdmin(e) {
+            e.preventDefault();
+            let pass = document.getElementById('input-pass-admin').value;
+            if(pass === "confir2026") {
+                cerrarModal('modal-login');
+                document.getElementById('input-pass-admin').value = '';
+                document.getElementById('btn-editar-precio').classList.remove('hidden');
+                document.getElementById('contenedor-selector-grupo').style.display = 'none';
+                document.getElementById('btn-nueva-comision').classList.remove('hidden');
+                document.getElementById('btn-nuevo-expositor').classList.remove('hidden');
+                document.getElementById('btn-nueva-actividad').classList.remove('hidden');
+                document.getElementById('controles-gastos-admin').classList.remove('hidden');
+                document.getElementById('panel-avisos-masivos').classList.remove('hidden');
+                renderizarTodo();
+                alert('¡Acceso de Administrador concedido!');
+            } else {
+                alert('Contraseña incorrecta. Intente de nuevo.');
+            }
+        }
+
+        function cancelarLogin() {
+            cerrarModal('modal-login');
+            document.getElementById('select-rol').value = "catequista";
+            cambiarRolSistema();
+        }
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(el => {
+                el.classList.remove('bg-white', 'text-guindo', 'shadow-lg');
+                el.classList.add('text-rose-100', 'hover:bg-white/10');
+            });
+            document.getElementById('tab-' + tabId).classList.remove('hidden');
+            let btn = document.getElementById('btn-' + tabId);
+            btn.classList.add('bg-white', 'text-guindo', 'shadow-lg');
+            btn.classList.remove('text-rose-100', 'hover:bg-white/10');
+        }
+
+        function abrirModal(id) { document.getElementById(id).classList.remove('hidden'); }
+        function cerrarModal(id) { document.getElementById(id).classList.add('hidden'); }
+
+        function generarRelojHorasMed() {
+            let n = parseInt(document.getElementById('j-dosis').value);
+            let cont = document.getElementById('reloj-horas-med');
+            cont.innerHTML = '';
+            for(let i=1; i<=n; i++) {
+                cont.innerHTML += `<div class="flex items-center space-x-2"><span class="text-slate-500 w-16 text-xs font-bold">Toma ${i}:</span><input type="time" required class="input-hora-med w-full p-2.5 rounded-xl border border-slate-200 bg-white text-xs font-bold"></div>`;
+            }
+        }
+
+        function guardarJoven(e) {
+            e.preventDefault();
+            let grupoNum = document.getElementById('select-grupo').value;
+            let nombre = document.getElementById('j-nombre').value;
+            let alergia = document.getElementById('j-alergia').value || 'Ninguna';
+            let med = document.getElementById('j-med').value || 'Ninguno';
+            let contacto = document.getElementById('j-contacto').value;
+            let celular = document.getElementById('j-celular').value;
+            let horas = [];
+            document.querySelectorAll('.input-hora-med').forEach(i => { if(i.value) horas.push(i.value); });
+
+            if(!baseDatos.grupos[grupoNum]) baseDatos.grupos[grupoNum] = { jovenes: [] };
+            baseDatos.grupos[grupoNum].jovenes.push({ nombre, alergia, med, horas, contacto, celular, pagado: 0, historial: [] });
+
+            // Sincronizar con Firebase Firestore
+            db.collection("retiro_datos").doc("principal").set(baseDatos).then(() => {
+                cerrarModal('modal-joven');
+                document.getElementById('form-joven').reset();
+                document.getElementById('reloj-horas-med').innerHTML = '';
+                alert('¡Joven registrado y sincronizado en la nube!');
+            });
+        }
+
+        function guardarAbono(e) {
+            e.preventDefault();
+            let grupoNum = document.getElementById('select-grupo').value;
+            let nombre = document.getElementById('abono-joven').value;
+            let monto = parseFloat(document.getElementById('abono-monto').value);
+            let recibe = document.getElementById('abono-recibe').value;
+
+            let g = baseDatos.grupos[grupoNum];
+            if(g) {
+                let j = g.jovenes.find(x => x.nombre === nombre);
+                if(j) {
+                    j.pagado += monto;
+                    j.historial.push(`${monto} Bs - Recibió: ${recibe}`);
+                }
+            }
+
+            db.collection("retiro_datos").doc("principal").set(baseDatos).then(() => {
+                cerrarModal('modal-abono');
+                alert('¡Pago actualizado en tiempo real!');
+            });
+        }
+
+        function guardarComision(e) {
+            e.preventDefault();
+            let nombre = document.getElementById('com-nombre').value;
+            let encStr = document.getElementById('com-encargados').value;
+            let encargados = encStr.split(',').map(s => s.trim());
+            baseDatos.comisiones.push({ nombre, encargados });
+
+            db.collection("retiro_datos").doc("principal").set(baseDatos).then(() => {
+                cerrarModal('modal-comision');
+                renderizarComisiones();
+                alert('¡Comisión creada!');
+            });
+        }
+
+        function guardarExpositor(e) {
+            e.preventDefault();
+            let nombre = document.getElementById('exp-nombre').value;
+            let tema = document.getElementById('exp-tema').value;
+            let foto = document.getElementById('exp-foto').value || 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png';
+            baseDatos.expositores.push({ nombre, tema, foto });
+
+            db.collection("retiro_datos").doc("principal").set(baseDatos).then(() => {
+                cerrarModal('modal-expositor');
+                renderizarExpositores();
+                alert('¡Expositor agregado!');
+            });
+        }
+
+        function guardarGasto(e) {
+            e.preventDefault();
+            let categoria = document.getElementById('gas-cat').value;
+            let desc = document.getElementById('gas-desc').value;
+            let monto = parseFloat(document.getElementById('gas-monto').value);
+            baseDatos.gastos.push({ id: Date.now(), categoria, desc, monto });
+
+            db.collection("retiro_datos").doc("principal").set(baseDatos).then(() => {
+                cerrarModal('modal-gasto');
+                renderizarGastos();
+                alert('¡Gasto registrado!');
+            });
+        }
+
+        function guardarActividad(e) {
+            e.preventDefault();
+            let inicio = document.getElementById('act-hora-inicio').value;
+            let fin = document.getElementById('act-hora-fin').value;
+            let hora = `${inicio} - ${fin}`;
+            let titulo = document.getElementById('act-titulo').value;
+            let resp = document.getElementById('act-resp').value;
+            baseDatos.cronograma.push({ id: Date.now(), hora, titulo, resp, hecho: false });
+
+            db.collection("retiro_datos").doc("principal").set(baseDatos).then(() => {
+                cerrarModal('modal-actividad');
+                renderizarCronograma();
+                alert('¡Actividad programada!');
+            });
+        }
+
+        function actualizarPrecioBase(e) {
+            e.preventDefault();
+            costoBase = parseFloat(document.getElementById('nuevo-precio').value);
+            document.getElementById('label-costo-base').innerText = costoBase.toFixed(2) + " Bs";
+            cerrarModal('modal-precio');
+            renderizarTodo();
+            alert('¡Costo base actualizado!');
+        }
+
+        function ponerCeroGastos() {
+            if(confirm('¿Desea poner todos los gastos en cero?')) {
+                baseDatos.gastos = [];
+                db.collection("retiro_datos").doc("principal").set(baseDatos).then(() => {
+                    renderizarGastos();
+                });
+            }
+        }
+
+        function enviarMasivo(tipo) {
+            let todosLosJovenes = [];
+            for(let g in baseDatos.grupos) {
+                baseDatos.grupos[g].jovenes.forEach(j => {
+                    if(j.celular) todosLosJovenes.push(j);
+                });
+            }
+
+            if(todosLosJovenes.length === 0) {
+                alert("No hay números de celular registrados en el sistema.");
+                return;
+            }
+
+            let textoBase = tipo === 'llegada' 
+                ? "¡Hola! Le informamos desde el Retiro de Catequistas 2026 de la Parroquia San Martín de Porres que los jóvenes han llegado con bien al lugar del evento y ya nos encontramos instalados. Dios les bendiga."
+                : "¡Hola! Les informamos desde el Retiro de Catequistas 2026 de la Parroquia San Martín de Porres que las actividades han concluido con éxito y ya estamos en camino de retorno. ¡Los esperamos!";
+
+            let primerJoven = todosLosJovenes[0];
+            let urlWsp = `https://wa.me/52${primerJoven.celular.replace(/\s+/g, '')}?text=${encodeURIComponent(textoBase)}`;
+            
+            alert(`📢 Difusión iniciada:\nSe enviará el comunicado al tutor de ${todosLosJovenes[0].nombre} (${todosLosJovenes[0].contacto}).`);
+            window.open(urlWsp, '_blank');
+        }
+
+        function renderizarTodo() {
+            let rol = document.getElementById('select-rol').value;
+            let grupoNum = document.getElementById('select-grupo').value;
+            let tbodySalud = document.getElementById('tabla-jovenes-body');
+            let tbodyPagos = document.getElementById('tabla-pagos-body');
+            let selectAbono = document.getElementById('abono-joven');
+            let colAccionesHeader = document.getElementById('col-header-acciones');
+            let colAccionGasto = document.getElementById('col-header-gasto-accion');
+
+            tbodySalud.innerHTML = '';
+            tbodyPagos.innerHTML = '';
+            selectAbono.innerHTML = '';
+
+            if(rol === 'admin') {
+                colAccionesHeader.classList.remove('hidden');
+                colAccionGasto.classList.remove('hidden');
+            } else {
+                colAccionesHeader.classList.add('hidden');
+                colAccionGasto.classList.add('hidden');
+            }
+
+            let jovenesAMostrar = [];
+            if(rol === 'admin') {
+                for(let g in baseDatos.grupos) {
+                    baseDatos.grupos[g].jovenes.forEach(j => jovenesAMostrar.push({...j, grupo: g}));
+                }
+            } else {
+                let g = baseDatos.grupos[grupoNum];
+                if(g) jovenesAMostrar = g.jovenes;
+            }
+
+            let totalRec = 0;
+            jovenesAMostrar.forEach(j => {
+                totalRec += j.pagado;
+                let pendiente = Math.max(0, costoBase - j.pagado);
+                let estado = j.pagado >= costoBase ? '<span class="px-3 py-1.5 bg-emerald-50 text-emerald-700 rounded-full font-bold">Pagado Total</span>' : '<span class="px-3 py-1 bg-amber-50 text-amber-700 rounded-full font-bold">Incompleto</span>';
+                let grupoTag = rol === 'admin' ? `<span class="text-[10px] bg-rose-100 text-guindo px-2 py-0.5 rounded-full font-bold mr-1">G-${j.grupo}</span>` : '';
+
+                let linkWsp = `https://wa.me/52${j.celular.replace(/\s+/g, '')}?text=Hola%20${encodeURIComponent(j.contacto)},%20te%20escribimos%20desde%20el%20retiro%20de%20catequistas.`;
+                let tdAccionAdmin = rol === 'admin' ? `<td class="p-4 text-center"><button onclick="eliminarJoven('${j.nombre}', '${j.grupo || grupoNum}')" class="text-rose-500 hover:text-rose-700 p-2"><i class="fa-solid fa-trash"></i></button></td>` : '';
+
+                tbodySalud.innerHTML += `
+                    <tr class="hover:bg-slate-50/80 transition">
+                        <td class="p-4 font-bold text-slate-900">${grupoTag}${j.nombre}</td>
+                        <td class="p-4"><span class="px-2.5 py-1 bg-rose-50 text-rose-700 rounded-full font-medium">${j.alergia}</span></td>
+                        <td class="p-4"><b>${j.med}</b><br><span class="text-slate-400">${j.horas.join(', ')}</span></td>
+                        <td class="p-4">${j.contacto}<br><a href="${linkWsp}" target="_blank" class="text-emerald-600 font-bold hover:underline inline-flex items-center gap-1.5 mt-1"><i class="fa-brands fa-whatsapp text-sm"></i> ${j.celular}</a></td>
+                        ${tdAccionAdmin}
+                    </tr>
+                `;
+
+                let hist = j.historial.map(h => `• ${h}`).join('<br>') || 'Sin abonos';
+                tbodyPagos.innerHTML += `
+                    <tr class="hover:bg-slate-50/80 transition">
+                        <td class="p-4 font-bold text-slate-900">${grupoTag}${j.nombre}</td>
+                        <td class="p-4 text-slate-500">${hist}</td>
+                        <td class="p-4 font-bold text-emerald-600">${j.pagado.toFixed(2)} Bs</td>
+                        <td class="p-4 font-bold text-amber-600">${pendiente.toFixed(2)} Bs</td>
+                        <td class="p-4 text-center">${estado}</td>
+                    </tr>
+                `;
+                selectAbono.innerHTML += `<option value="${j.nombre}">${grupoTag}${j.nombre} (Debe: ${pendiente} Bs)</option>`;
+            });
+
+            document.getElementById('stat-recaudado').innerText = totalRec.toFixed(2) + " Bs";
+            document.getElementById('stat-pendiente').innerText = ((jovenesAMostrar.length * costoBase) - totalRec).toFixed(2) + " Bs";
+            renderizarComisiones();
+            renderizarExpositores();
+            renderizarGastos();
+            renderizarCronograma();
+        }
+
+        function eliminarJoven(nombre, grupoG) {
+            if(confirm('¿Eliminar a ' + nombre + '?')) {
+                baseDatos.grupos[grupoG].jovenes = baseDatos.grupos[grupoG].jovenes.filter(j => j.nombre !== nombre);
+                db.collection("retiro_datos").doc("principal").set(baseDatos).then(() => {
+                    renderizarTodo();
+                });
+            }
+        }
+
+        function renderizarComisiones() {
+            let rol = document.getElementById('select-rol').value;
+            let grid = document.getElementById('grid-comisiones');
+            grid.innerHTML = '';
+            baseDatos.comisiones.forEach((c, index) => {
+                let encHtml = c.encargados.map(en => `<div class="flex items-center space-x-2"><i class="fa-solid fa-user-check text-emerald-500"></i><span>${en}</span></div>`).join('');
+                let btnEliminar = rol === 'admin' ? `<button onclick="baseDatos.comisiones.splice(${index}, 1); db.collection('retiro_datos').doc('principal').set(baseDatos).then(() => renderizarComisiones());" class="text-rose-500 hover:text-rose-700 text-xs font-bold"><i class="fa-solid fa-trash"></i> Eliminar</button>` : '';
+                grid.innerHTML += `
+                    <div class="bg-white p-7 rounded-[2.5rem] shadow-sm border border-slate-200 space-y-3 relative">
+                        <div class="flex justify-between items-center">
+                            <h3 class="font-black text-slate-900 text-sm flex items-center space-x-2"><i class="fa-solid fa-users text-guindo"></i><span>${c.nombre}</span></h3>
+                            ${btnEliminar}
+                        </div>
+                        <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100 text-xs space-y-2 font-medium">${encHtml}</div>
+                    </div>
+                `;
+            });
+        }
+
+        function renderizarExpositores() {
+            let grid = document.getElementById('grid-expositores');
+            grid.innerHTML = '';
+            baseDatos.expositores.forEach(e => {
+                grid.innerHTML += `
+                    <div class="bg-white p-7 rounded-[2.5rem] shadow-sm border border-slate-200 flex items-center space-x-4">
+                        <div class="w-16 h-16 rounded-2xl bg-slate-100 overflow-hidden flex-shrink-0 border border-slate-200 shadow-sm">
+                            <img src="${e.foto}" alt="Expositor" onerror="this.onerror=null;this.src='https://cdn-icons-png.flaticon.com/512/3135/3135715.png';" class="w-full h-full object-cover">
+                        </div>
+                        <div>
+                            <h3 class="font-black text-slate-900 text-sm">${e.nombre}</h3>
+                            <p class="text-xs text-guindo font-bold mt-0.5">${e.tema}</p>
+                            <span class="inline-block text-[10px] bg-rose-50 text-guindo px-2.5 py-0.5 rounded-full mt-2 font-extrabold tracking-wide">Ponente Oficial</span>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        function renderizarGastos() {
+            let rol = document.getElementById('select-rol').value;
+            let tbody = document.getElementById('tabla-gastos-body');
+            tbody.innerHTML = '';
+            baseDatos.gastos.forEach(g => {
+                let tdAccionGasto = rol === 'admin' ? `<td class="p-4 text-center"><button onclick="baseDatos.gastos = baseDatos.gastos.filter(x => x.id !== ${g.id}); db.collection('retiro_datos').doc('principal').set(baseDatos).then(() => renderizarGastos());" class="text-rose-500 hover:text-rose-700 p-2"><i class="fa-solid fa-trash"></i></button></td>` : '';
+                tbody.innerHTML += `
+                    <tr class="hover:bg-slate-50/80 transition">
+                        <td class="p-4 font-bold text-guindo">${g.categoria}</td>
+                        <td class="p-4">${g.desc}</td>
+                        <td class="p-4 font-bold text-rose-600">- ${g.monto.toFixed(2)} Bs</td>
+                        ${tdAccionGasto}
+                    </tr>
+                `;
+            });
+        }
+
+        function renderizarCronograma() {
+            let cont = document.getElementById('lista-cronograma');
+            cont.innerHTML = '';
+            baseDatos.cronograma.forEach(a => {
+                let check = a.hecho ? 'checked' : '';
+                cont.innerHTML += `
+                    <div class="bg-white p-6 rounded-[2.5rem] shadow-sm border border-slate-200 flex items-center justify-between gap-4">
+                        <div class="flex items-center space-x-4">
+                            <input type="checkbox" ${check} onchange="a.hecho = !a.hecho; db.collection('retiro_datos').doc('principal').set(baseDatos);" class="w-6 h-6 text-guindo rounded-lg cursor-pointer">
+                            <div>
+                                <span class="text-xs font-black text-guindo tracking-wider">${a.hora}</span>
+                                <h4 class="font-black text-slate-900 text-base mt-0.5">${a.titulo}</h4>
+                                <p class="text-xs text-slate-400 mt-0.5">Responsable / Expositor: <span class="font-bold text-slate-600">${a.resp}</span></p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        // SINCRONIZACIÓN EN TIEMPO REAL CON FIREBASE
+        window.onload = function() {
+            db.collection("retiro_datos").doc("principal").onSnapshot((doc) => {
+                if (doc.exists) {
+                    baseDatos = doc.data();
+                    renderizarTodo();
+                } else {
+                    // Inicializar si está vacío
+                    db.collection("retiro_datos").doc("principal").set(baseDatos);
+                }
+            });
+        };
+    </script>
+</body>
+</html>
