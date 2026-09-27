@@ -223,7 +223,7 @@
                     <h2 class="text-xl font-black text-slate-900 tracking-tight">Expositores del Retiro</h2>
                     <p class="text-xs text-slate-500 font-medium">Directorio de ponentes y charlas magistrales.</p>
                 </div>
-                <button id="btn-nuevo-expositor" onclick="abrirModal('modal-expositor')" class="hidden bg-guindo text-white font-bold px-6 py-3.5 rounded-2xl text-xs shadow-xl shadow-rose-900/20 transition transform active:scale-95">+ Agregar Expositor</button>
+                <button id="btn-nuevo-expositor" onclick="prepararNuevoExpositor()" class="hidden bg-guindo text-white font-bold px-6 py-3.5 rounded-2xl text-xs shadow-xl shadow-rose-900/20 transition transform active:scale-95">+ Agregar Expositor</button>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="grid-expositores"></div>
         </section>
@@ -281,7 +281,7 @@
     <div id="modal-joven" class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
         <div class="bg-white rounded-[2.5rem] p-8 max-w-md w-full shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto text-xs">
             <h3 class="text-lg font-black text-slate-900">Registrar Nuevo Joven</h3>
-            <form onsubmit="guardarJoven(event)" class="space-y-3">
+            <form id="form-joven-reg" onsubmit="guardarJoven(event)" class="space-y-3">
                 <div><label class="block font-bold text-slate-700 mb-1">Nombre Completo</label><input type="text" id="j-nombre" required class="capitalized-text w-full p-3.5 rounded-2xl border border-slate-200 outline-none font-medium focus:ring-2 focus:ring-[#6a1b29]" placeholder="Ej. Mateo Benítez"></div>
                 <div><label class="block font-bold text-slate-700 mb-1">Condición Médica / Alergias</label><input type="text" id="j-alergia" class="capitalized-text w-full p-3.5 rounded-2xl border border-slate-200 outline-none focus:ring-2 focus:ring-[#6a1b29]" placeholder="Ej. Asma leve"></div>
                 
@@ -306,7 +306,7 @@
                 </div>
                 <div class="flex space-x-2 pt-3">
                     <button type="button" onclick="cerrarModal('modal-joven')" class="w-1/2 bg-slate-100 py-3.5 rounded-2xl font-bold hover:bg-slate-200 transition">Cancelar</button>
-                    <button type="submit" class="w-1/2 bg-guindo text-white py-3.5 rounded-2xl font-bold shadow-lg shadow-rose-900/30 transition">Guardar</button>
+                    <button type="submit" id="btn-guardar-joven" class="w-1/2 bg-guindo text-white py-3.5 rounded-2xl font-bold shadow-lg shadow-rose-900/30 transition">Guardar</button>
                 </div>
             </form>
         </div>
@@ -341,11 +341,12 @@
         </div>
     </div>
 
-    <!-- MODAL EXPOSITOR CON SELECTOR DE ARCHIVO REAL -->
+    <!-- MODAL EXPOSITOR CON EDICIÓN -->
     <div id="modal-expositor" class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
         <div class="bg-white rounded-[2.5rem] p-8 max-w-md w-full shadow-2xl space-y-4 text-xs">
-            <h3 class="text-lg font-black text-slate-900">Agregar Expositor</h3>
+            <h3 id="titulo-modal-expositor" class="text-lg font-black text-slate-900">Agregar Expositor</h3>
             <form onsubmit="guardarExpositor(event)" class="space-y-3">
+                <input type="hidden" id="exp-index" value="-1">
                 <div><label class="block font-bold text-slate-700 mb-1">Nombre Completo</label><input type="text" id="exp-nombre" required class="capitalized-text w-full p-3.5 rounded-2xl border border-slate-200 outline-none font-medium focus:ring-2 focus:ring-[#6a1b29]" placeholder="Ej. Padre Juan Pérez"></div>
                 <div><label class="block font-bold text-slate-700 mb-1">Tema / Charla</label><input type="text" id="exp-tema" required class="capitalized-text w-full p-3.5 rounded-2xl border border-slate-200 outline-none focus:ring-2 focus:ring-[#6a1b29]" placeholder="Ej. El llamado a la conversión"></div>
                 <div>
@@ -354,7 +355,7 @@
                 </div>
                 <div class="flex space-x-2 pt-3">
                     <button type="button" onclick="cerrarModal('modal-expositor')" class="w-1/2 bg-slate-100 py-3.5 rounded-2xl font-bold hover:bg-slate-200 transition">Cancelar</button>
-                    <button type="submit" class="w-1/2 bg-guindo text-white py-3.5 rounded-2xl font-bold shadow-lg shadow-rose-900/30 transition">Guardar</button>
+                    <button type="submit" id="btn-guardar-expositor" class="w-1/2 bg-guindo text-white py-3.5 rounded-2xl font-bold shadow-lg shadow-rose-900/30 transition">Guardar</button>
                 </div>
             </form>
         </div>
@@ -412,7 +413,7 @@
         </div>
     </div>
 
-    <!-- SCRIPT DE FIREBASE Y LÓGICA -->
+    <!-- SCRIPT GENERAL -->
     <script>
         const firebaseConfig = {
             apiKey: "TU_API_KEY",
@@ -529,6 +530,10 @@
 
         function guardarJoven(e) {
             e.preventDefault();
+            let btnGuardar = document.getElementById('btn-guardar-joven');
+            btnGuardar.disabled = true;
+            btnGuardar.innerText = "Guardando...";
+
             let grupoNum = document.getElementById('select-grupo').value;
             let nombre = document.getElementById('j-nombre').value;
             let alergia = document.getElementById('j-alergia').value || 'Ninguna';
@@ -543,8 +548,10 @@
 
             db.collection("retiro_datos").doc("principal").set(baseDatos).then(() => {
                 cerrarModal('modal-joven');
-                document.getElementById('form-joven').reset();
+                document.getElementById('form-joven-reg').reset();
                 document.getElementById('reloj-horas-med').innerHTML = '';
+                btnGuardar.disabled = false;
+                btnGuardar.innerText = "Guardar";
                 alert('✨ ¡Creación exitosa! Joven registrado correctamente.');
             });
         }
@@ -584,30 +591,55 @@
             });
         }
 
+        function prepararNuevoExpositor() {
+            document.getElementById('titulo-modal-expositor').innerText = "Agregar Expositor";
+            document.getElementById('exp-index').value = "-1";
+            document.getElementById('exp-nombre').value = "";
+            document.getElementById('exp-tema').value = "";
+            document.getElementById('exp-file').value = "";
+            abrirModal('modal-expositor');
+        }
+
+        function editarExpositor(index) {
+            let e = baseDatos.expositores[index];
+            document.getElementById('titulo-modal-expositor').innerText = "Editar Expositor";
+            document.getElementById('exp-index').value = index;
+            document.getElementById('exp-nombre').value = e.nombre;
+            document.getElementById('exp-tema').value = e.tema;
+            abrirModal('modal-expositor');
+        }
+
         function guardarExpositor(e) {
             e.preventDefault();
+            let index = parseInt(document.getElementById('exp-index').value);
             let nombre = document.getElementById('exp-nombre').value;
             let tema = document.getElementById('exp-tema').value;
             let fileInput = document.getElementById('exp-file');
             
-            let fotoUrl = "https://cdn-icons-png.flaticon.com/512/3135/3135715.png";
+            let procesarGuardado = (fotoUrl) => {
+                if(index === -1) {
+                    baseDatos.expositores.push({ nombre, tema, foto: fotoUrl });
+                } else {
+                    baseDatos.expositores[index].nombre = nombre;
+                    baseDatos.expositores[index].tema = tema;
+                    if(fotoUrl) baseDatos.expositores[index].foto = fotoUrl;
+                }
+
+                db.collection("retiro_datos").doc("principal").set(baseDatos).then(() => {
+                    cerrarModal('modal-expositor');
+                    alert('✨ ¡Operación exitosa!');
+                });
+            };
+
             if(fileInput.files && fileInput.files[0]) {
                 let reader = new FileReader();
-                reader.onload = function(e) {
-                    fotoUrl = e.target.result; // Convierte la foto local a imagen visible
-                    baseDatos.expositores.push({ nombre, tema, foto: fotoUrl });
-                    db.collection("retiro_datos").doc("principal").set(baseDatos).then(() => {
-                        cerrarModal('modal-expositor');
-                        alert('✨ ¡Creación exitosa! Expositor agregado correctamente.');
-                    });
+                reader.onload = function(evt) {
+                    procesarGuardado(evt.target.result);
                 };
                 reader.readAsDataURL(fileInput.files[0]);
             } else {
-                baseDatos.expositores.push({ nombre, tema, foto: fotoUrl });
-                db.collection("retiro_datos").doc("principal").set(baseDatos).then(() => {
-                    cerrarModal('modal-expositor');
-                    alert('✨ ¡Creación exitosa! Expositor agregado correctamente.');
-                });
+                let fotoActual = index !== -1 ? baseDatos.expositores[index].foto : "https://cdn-icons-png.flaticon.com/512/3135/3135715.png";
+                procesarGuardado(fotoActual);
             }
         }
 
@@ -778,18 +810,27 @@
         }
 
         function renderizarExpositores() {
+            let rol = document.getElementById('select-rol').value;
             let grid = document.getElementById('grid-expositores');
             grid.innerHTML = '';
-            baseDatos.expositores.forEach(e => {
+            baseDatos.expositores.forEach((e, index) => {
+                let botonesAdmin = rol === 'admin' ? `
+                    <div class="mt-2 flex space-x-3 text-xs">
+                        <button onclick="editarExpositor(${index})" class="text-indigo-600 font-bold hover:underline"><i class="fa-solid fa-pen"></i> Editar</button>
+                        <button onclick="baseDatos.expositores.splice(${index}, 1); db.collection('retiro_datos').doc('principal').set(baseDatos);" class="text-rose-500 font-bold hover:underline"><i class="fa-solid fa-trash"></i> Eliminar</button>
+                    </div>
+                ` : '';
+
                 grid.innerHTML += `
                     <div class="bg-white p-7 rounded-[2.5rem] shadow-sm border border-slate-200 flex items-center space-x-4">
                         <div class="w-16 h-16 rounded-2xl bg-slate-100 overflow-hidden flex-shrink-0 border border-slate-200 shadow-sm">
                             <img src="${e.foto}" alt="Expositor" onerror="this.onerror=null;this.src='https://cdn-icons-png.flaticon.com/512/3135/3135715.png';" class="w-full h-full object-cover">
                         </div>
-                        <div>
+                        <div class="flex-grow">
                             <h3 class="font-black text-slate-900 text-sm">${e.nombre}</h3>
                             <p class="text-xs text-guindo font-bold mt-0.5">${e.tema}</p>
                             <span class="inline-block text-[10px] bg-rose-50 text-guindo px-2.5 py-0.5 rounded-full mt-2 font-extrabold tracking-wide">Ponente Oficial</span>
+                            ${botonesAdmin}
                         </div>
                     </div>
                 `;
