@@ -28,7 +28,7 @@
     <div id="modal-login" class="fixed inset-0 bg-slate-950/75 backdrop-blur-md hidden flex items-center justify-center p-4 z-50">
         <div class="bg-white rounded-[2rem] p-6 sm:p-8 max-w-sm w-full shadow-2xl space-y-5 border border-slate-100 text-center">
             <div class="w-16 h-16 bg-gradient-to-tr from-[#581823] to-[#7a2331] text-amber-300 rounded-2xl mx-auto flex items-center justify-center text-2xl shadow-lg overflow-hidden border-2 border-white">
-                <img src="logo.png" alt="Logo" onerror="this.onerror=null;this.src='https://cdn-icons-png.flaticon.com/512/330/330447.png';" class="w-full h-full object-cover">
+                <img src="../FOTOS/LOGO/logo.jpg" alt="Logo" onerror="this.onerror=null;this.src='https://cdn-icons-png.flaticon.com/512/330/330447.png';" class="w-full h-full object-cover">
             </div>
             <div>
                 <h3 class="text-lg font-black text-slate-900">Acceso de Coordinación</h3>
@@ -58,7 +58,7 @@
             <div class="flex flex-col sm:flex-row justify-between items-center gap-3">
                 <div class="flex items-center space-x-3 w-full sm:w-auto">
                     <div class="w-11 h-11 rounded-xl bg-white/10 flex items-center justify-center text-amber-300 text-lg font-bold border border-white/20 overflow-hidden flex-shrink-0">
-                        <img id="img-logo-parroquia" src="logo.png" alt="Logo" onerror="this.onerror=null;this.src='https://cdn-icons-png.flaticon.com/512/330/330447.png';" class="w-full h-full object-cover">
+                        <img id="img-logo-parroquia" src="../FOTOS/LOGO/logo.jpg" alt="Logo" onerror="this.onerror=null;this.src='https://cdn-icons-png.flaticon.com/512/330/330447.png';" class="w-full h-full object-cover">
                     </div>
                     <div>
                         <h1 class="text-sm sm:text-base font-black tracking-tight leading-tight">Retiro Catequistas <span class="text-[9px] bg-amber-400 text-slate-950 px-1.5 py-0.5 rounded uppercase font-extrabold">San Martín</span></h1>
@@ -392,7 +392,7 @@
     </div>
 
     <!-- SCRIPT FIREBASE Y LÓGICA -->
-    <script>
+        <script>
         const firebaseConfig = {
             apiKey: "TU_API_KEY",
             authDomain: "tu-proyecto.firebaseapp.com",
@@ -412,6 +412,25 @@
             gastos: [],
             cronograma: []
         };
+
+        function esFirebaseConfigurado() {
+            return firebaseConfig.apiKey !== "TU_API_KEY";
+        }
+
+        async function guardarDatos() {
+            if (esFirebaseConfigurado()) {
+                try {
+                    await db.collection("retiro_datos").doc("principal").set(baseDatos);
+                } catch (e) {
+                    console.error("Error Firebase:", e);
+                    localStorage.setItem("retiro_datos", JSON.stringify(baseDatos));
+                    renderizarTodo();
+                }
+            } else {
+                localStorage.setItem("retiro_datos", JSON.stringify(baseDatos));
+                renderizarTodo();
+            }
+        }
 
         function togglePassword() {
             let inputPass = document.getElementById('input-pass-admin');
@@ -505,12 +524,12 @@
             if(!baseDatos.grupos[grupoNum]) baseDatos.grupos[grupoNum] = { jovenes: [] };
             baseDatos.grupos[grupoNum].jovenes.push({ nombre, alergia, med, horas, contacto, celular, pagado: 0, historial: [] });
 
-            db.collection("retiro_datos").doc("principal").set(baseDatos).then(() => {
+            guardarDatos().then(() => {
                 cerrarModal('modal-joven');
                 document.getElementById('form-joven-reg').reset();
                 document.getElementById('reloj-horas-med').innerHTML = '';
                 alert('✨ ¡Creación exitosa! Joven registrado correctamente.');
-            }).catch(err => alert("Error: " + err.message));
+            }).catch(err => alert("Error al guardar: " + err.message));
         }
 
         function guardarAbono(e) {
@@ -529,7 +548,7 @@
                 }
             }
 
-            db.collection("retiro_datos").doc("principal").set(baseDatos).then(() => {
+            guardarDatos().then(() => {
                 cerrarModal('modal-abono');
                 alert('✨ ¡Creación exitosa! Abono registrado.');
             });
@@ -542,7 +561,7 @@
             let encargados = encStr.split(',').map(s => s.trim());
             baseDatos.comisiones.push({ nombre, encargados });
 
-            db.collection("retiro_datos").doc("principal").set(baseDatos).then(() => {
+            guardarDatos().then(() => {
                 cerrarModal('modal-comision');
                 alert('✨ ¡Creación exitosa! Comisión creada.');
             });
@@ -582,10 +601,10 @@
                     if(fotoUrl) baseDatos.expositores[index].foto = fotoUrl;
                 }
 
-                db.collection("retiro_datos").doc("principal").set(baseDatos).then(() => {
+                guardarDatos().then(() => {
                     cerrarModal('modal-expositor');
                     alert('✨ ¡Creación exitosa! Expositor guardado.');
-                }).catch(err => alert("Error al guardar en Firebase: " + err.message));
+                }).catch(err => alert("Error: " + err.message));
             };
 
             if(fileInput.files && fileInput.files[0]) {
@@ -605,7 +624,7 @@
             let monto = parseFloat(document.getElementById('gas-monto').value);
             baseDatos.gastos.push({ id: Date.now(), categoria, desc, monto });
 
-            db.collection("retiro_datos").doc("principal").set(baseDatos).then(() => {
+            guardarDatos().then(() => {
                 cerrarModal('modal-gasto');
                 alert('✨ ¡Creación exitosa! Gasto registrado.');
             });
@@ -620,7 +639,7 @@
             let resp = document.getElementById('act-resp').value;
             baseDatos.cronograma.push({ id: Date.now(), hora, titulo, resp, hecho: false });
 
-            db.collection("retiro_datos").doc("principal").set(baseDatos).then(() => {
+            guardarDatos().then(() => {
                 cerrarModal('modal-actividad');
                 alert('✨ ¡Creación exitosa! Actividad programada.');
             });
@@ -638,7 +657,7 @@
         function ponerCeroGastos() {
             if(confirm('¿Poner todos los gastos en cero?')) {
                 baseDatos.gastos = [];
-                db.collection("retiro_datos").doc("principal").set(baseDatos);
+                guardarDatos();
             }
         }
 
@@ -738,7 +757,7 @@
         function eliminarJoven(nombre, grupoG) {
             if(confirm('¿Eliminar a ' + nombre + '?')) {
                 baseDatos.grupos[grupoG].jovenes = baseDatos.grupos[grupoG].jovenes.filter(j => j.nombre !== nombre);
-                db.collection("retiro_datos").doc("principal").set(baseDatos);
+                guardarDatos();
             }
         }
 
@@ -748,7 +767,7 @@
             grid.innerHTML = '';
             (baseDatos.comisiones || []).forEach((c, index) => {
                 let encHtml = (c.encargados || []).map(en => `<div class="flex items-center space-x-1.5"><i class="fa-solid fa-user-check text-emerald-500"></i><span>${en}</span></div>`).join('');
-                let btnEliminar = rol === 'admin' ? `<button onclick="baseDatos.comisiones.splice(${index}, 1); db.collection('retiro_datos').doc('principal').set(baseDatos);" class="text-rose-500 text-xs font-bold"><i class="fa-solid fa-trash"></i></button>` : '';
+                let btnEliminar = rol === 'admin' ? `<button onclick="baseDatos.comisiones.splice(${index}, 1); guardarDatos();" class="text-rose-500 text-xs font-bold"><i class="fa-solid fa-trash"></i></button>` : '';
                 grid.innerHTML += `
                     <div class="bg-white p-5 rounded-3xl shadow-sm border space-y-2">
                         <div class="flex justify-between items-center"><h3 class="font-black text-slate-900 text-xs flex items-center space-x-1.5"><i class="fa-solid fa-users text-guindo"></i><span>${c.nombre}</span></h3>${btnEliminar}</div>
@@ -766,7 +785,7 @@
                 let botonesAdmin = rol === 'admin' ? `
                     <div class="mt-2 flex space-x-3 text-xs">
                         <button onclick="editarExpositor(${index})" class="text-indigo-600 font-bold"><i class="fa-solid fa-pen"></i> Editar</button>
-                        <button onclick="baseDatos.expositores.splice(${index}, 1); db.collection('retiro_datos').doc('principal').set(baseDatos);" class="text-rose-500 font-bold"><i class="fa-solid fa-trash"></i></button>
+                        <button onclick="baseDatos.expositores.splice(${index}, 1); guardarDatos();" class="text-rose-500 font-bold"><i class="fa-solid fa-trash"></i></button>
                     </div>
                 ` : '';
 
@@ -791,7 +810,7 @@
             tbody.innerHTML = '';
             if((baseDatos.gastos || []).length === 0) { tbody.innerHTML = `<tr><td colspan="4" class="p-3 text-center text-slate-400">Sin gastos.</td></tr>`; return; }
             baseDatos.gastos.forEach(g => {
-                let tdAccionGasto = rol === 'admin' ? `<td class="p-3 text-center"><button onclick="baseDatos.gastos = baseDatos.gastos.filter(x => x.id !== ${g.id}); db.collection('retiro_datos').doc('principal').set(baseDatos);" class="text-rose-500"><i class="fa-solid fa-trash"></i></button></td>` : '';
+                let tdAccionGasto = rol === 'admin' ? `<td class="p-3 text-center"><button onclick="baseDatos.gastos = baseDatos.gastos.filter(x => x.id !== ${g.id}); guardarDatos();" class="text-rose-500"><i class="fa-solid fa-trash"></i></button></td>` : '';
                 tbody.innerHTML += `
                     <tr class="hover:bg-slate-50">
                         <td class="p-3 font-bold text-guindo">${g.categoria}</td>
@@ -811,7 +830,7 @@
                 cont.innerHTML += `
                     <div class="bg-white p-4 rounded-3xl shadow-sm border flex items-center justify-between gap-3">
                         <div class="flex items-center space-x-3">
-                            <input type="checkbox" ${check} onchange="a.hecho = !a.hecho; db.collection('retiro_datos').doc('principal').set(baseDatos);" class="w-5 h-5 text-guindo rounded cursor-pointer">
+                            <input type="checkbox" ${check} onchange="a.hecho = !a.hecho; guardarDatos();" class="w-5 h-5 text-guindo rounded cursor-pointer">
                             <div>
                                 <span class="text-[11px] font-black text-guindo">${a.hora}</span>
                                 <h4 class="font-black text-slate-900 text-xs">${a.titulo}</h4>
@@ -823,17 +842,39 @@
             });
         }
 
-        // CARGA Y ESCUCHA EN TIEMPO REAL DESDE FIREBASE
+                // CARGA Y ESCUCHA EN TIEMPO REAL DESDE FIREBASE O LOCAL
         window.onload = function() {
-            db.collection("retiro_datos").doc("principal").onSnapshot((doc) => {
-                if (doc.exists) {
-                    baseDatos = doc.data();
-                    renderizarTodo();
-                } else {
-                    db.collection("retiro_datos").doc("principal").set(baseDatos);
+            if (esFirebaseConfigurado()) {
+                try {
+                    db.collection("retiro_datos").doc("principal").onSnapshot((doc) => {
+                        if (doc.exists) {
+                            baseDatos = doc.data();
+                            renderizarTodo();
+                        } else {
+                            guardarDatos();
+                            renderizarTodo();
+                        }
+                    }, (error) => {
+                        console.error("Firebase Snapshot Error:", error);
+                        cargarDatosLocales();
+                    });
+                } catch (e) {
+                    cargarDatosLocales();
                 }
-            });
+            } else { cargarDatosLocales(); }
         };
+
+        function cargarDatosLocales() {
+            let localData = localStorage.getItem("retiro_datos");
+            if (localData) {
+                baseDatos = JSON.parse(localData);
+            } else {
+                guardarDatos();
+            }
+            renderizarTodo();
+        }
     </script>
 </body>
 </html>
+
+
