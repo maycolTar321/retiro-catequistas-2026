@@ -391,7 +391,7 @@
         </div>
     </div>
 
-    <!-- SCRIPT FIREBASE Y LÓGICA ESTABLE -->
+    <!-- SCRIPT FIREBASE Y LÓGICA -->
     <script>
         const firebaseConfig = {
             apiKey: "TU_API_KEY",
@@ -584,7 +584,7 @@
 
                 db.collection("retiro_datos").doc("principal").set(baseDatos).then(() => {
                     cerrarModal('modal-expositor');
-                    alert('✨ ¡Operación exitosa!');
+                    alert('✨ ¡Creación exitosa! Expositor guardado.');
                 });
             };
 
@@ -830,7 +830,6 @@
                     baseDatos = doc.data();
                     renderizarTodo();
                 } else {
-                    // Si no existe, crea el documento inicial en Firebase
                     db.collection("retiro_datos").doc("principal").set(baseDatos);
                 }
             });
