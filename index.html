@@ -117,7 +117,7 @@
                     <h3 class="text-sm font-black mt-1">Difusión Masiva a Papás</h3>
                     <p class="text-xs text-rose-200">Avisos rápidos vía WhatsApp.</p>
                 </div>
-                <div class="flex gap-2 w-full sm:w-auto">
+                <div class="flex gap-2 w-full sm:w-auto flex-wrap justify-end">
                     <button onclick="enviarMasivo('llegada')" class="flex-1 sm:flex-none bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3.5 py-2 rounded-xl text-xs shadow"><i class="fa-brands fa-whatsapp mr-1"></i> Llegada</button>
                     <button onclick="enviarMasivo('salida')" class="flex-1 sm:flex-none bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-3.5 py-2 rounded-xl text-xs shadow"><i class="fa-brands fa-whatsapp mr-1"></i> Salida</button>
                 </div>
@@ -230,7 +230,8 @@
                     <div class="flex justify-between items-center">
                         <h3 class="font-bold text-slate-900">Caja y Gastos</h3>
                         <div id="controles-gastos-admin" class="hidden flex space-x-2">
-                            <button onclick="abrirModal('modal-gasto')" class="bg-amber-600 text-white font-bold px-3 py-2 rounded-xl text-xs">+ Gasto</button>
+                            <button onclick="generarReporteFinanciero()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-3 py-2 rounded-xl text-xs shadow"><i class="fa-solid fa-file-pdf mr-1"></i> Reporte</button>
+                            <button onclick="abrirModal('modal-gasto')" class="bg-amber-600 text-white font-bold px-3 py-2 rounded-xl text-xs shadow">+ Gasto</button>
                             <button onclick="ponerCeroGastos()" class="bg-rose-100 text-rose-700 font-bold px-3 py-2 rounded-xl text-xs">En Cero</button>
                         </div>
                     </div>
@@ -388,6 +389,18 @@
                     <button type="submit" class="w-1/2 bg-guindo text-white py-3 rounded-xl font-bold shadow">Actualizar</button>
                 </div>
             </form>
+        </div>
+    </div>
+
+        <div id="modal-medicos" class="fixed inset-0 bg-slate-950/70 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl space-y-4 max-h-[90vh] flex flex-col text-xs">
+            <div class="flex justify-between items-center">
+                <h3 class="text-base font-bold text-slate-900"><i class="fa-solid fa-notes-medical text-rose-600"></i> Alertas y Medicamentos</h3>
+                <button onclick="cerrarModal('modal-medicos')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <div class="overflow-y-auto flex-grow space-y-2" id="lista-medicos-content">
+            </div>
+            <button onclick="descargarReporteMedico()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-3 rounded-xl shadow-sm border mt-2 transition"><i class="fa-solid fa-download"></i> Descargar Lista (.txt)</button>
         </div>
     </div>
 
@@ -668,6 +681,107 @@
             }
         }
 
+                function generarReporteFinanciero() {
+            let totalRecaudado = 0;
+            for(let g in baseDatos.grupos) {
+                if(baseDatos.grupos[g].jovenes) {
+                    baseDatos.grupos[g].jovenes.forEach(j => { totalRecaudado += (j.pagado || 0); });
+                }
+            }
+
+            let totalGastos = 0;
+            let texto = "REPORTE FINANCIERO - RETIRO 2026\n=================================\n\n";
+            texto += "INGRESOS (COBROS):\n";
+            texto += "Total Recaudado: " + totalRecaudado.toFixed(2) + " Bs\n\n";
+
+            texto += "EGRESOS (GASTOS):\n";
+            if ((baseDatos.gastos || []).length === 0) {
+                texto += "No hay gastos registrados.\n";
+            } else {
+                baseDatos.gastos.forEach(g => {
+                    texto += "- " + g.categoria + ": " + g.desc + " -> " + (g.monto || 0).toFixed(2) + " Bs\n";
+                    totalGastos += (g.monto || 0);
+                });
+            }
+            texto += "Total Gastado: " + totalGastos.toFixed(2) + " Bs\n\n";
+            
+            texto += "RESUMEN DE CAJA:\n=================================\n";
+            texto += "SALDO EN CAJA: " + (totalRecaudado - totalGastos).toFixed(2) + " Bs\n";
+
+            let blob = new Blob([texto], { type: "text/plain;charset=utf-8" });
+            let url = URL.createObjectURL(blob);
+            let a = document.createElement("a");
+            a.href = url;
+            a.download = "Reporte_Financiero_Retiro_2026.txt";
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+                function verReporteMedicos() {
+            let cont = document.getElementById('lista-medicos-content');
+            cont.innerHTML = '';
+            let hay = false;
+
+            for(let g in baseDatos.grupos) {
+                if(baseDatos.grupos[g].jovenes) {
+                    baseDatos.grupos[g].jovenes.forEach(j => {
+                        let tomaMed = (j.med && j.med.toLowerCase() !== 'ninguno' && j.med.trim() !== '') || (j.horas && j.horas.length > 0);
+                        let tieneAlergia = (j.alergia && j.alergia.toLowerCase() !== 'ninguna' && j.alergia.trim() !== '');
+
+                        if(tomaMed || tieneAlergia) {
+                            hay = true;
+                            let medText = tomaMed ? `<span class="text-guindo font-bold">${j.med}</span> (${(j.horas||[]).join(', ')})` : '';
+                            let alerText = tieneAlergia ? `<span class="text-rose-600 font-bold">Alergia: ${j.alergia}</span>` : '';
+                            cont.innerHTML += `
+                                <div class="bg-slate-50 p-3 rounded-xl border border-slate-200">
+                                    <div class="flex justify-between">
+                                        <span class="font-black text-slate-900">${j.nombre}</span>
+                                        <span class="bg-slate-200 text-slate-700 px-2 py-0.5 rounded text-[10px] font-bold">G-${g}</span>
+                                    </div>
+                                    <div class="mt-1.5 space-y-1">
+                                        ${alerText ? `<div><i class="fa-solid fa-triangle-exclamation text-rose-500"></i> ${alerText}</div>` : ''}
+                                        ${tomaMed ? `<div><i class="fa-solid fa-pills text-guindo"></i> ${medText}</div>` : ''}
+                                        <div class="text-[10px] text-slate-500 mt-1"><i class="fa-solid fa-phone"></i> Tutor: ${j.contacto} (${j.celular})</div>
+                                    </div>
+                                </div>
+                            `;
+                        }
+                    });
+                }
+            }
+
+            if(!hay) cont.innerHTML = '<p class="text-center text-slate-400 p-4">Nadie requiere medicaci n o tiene alergias registradas.</p>';
+            abrirModal('modal-medicos');
+        }
+
+        function descargarReporteMedico() {
+            let texto = "REPORTE MEDICO Y ALERGIAS - RETIRO 2026\n=================================\n\n";
+            let hay = false;
+            for(let g in baseDatos.grupos) {
+                if(baseDatos.grupos[g].jovenes) {
+                    baseDatos.grupos[g].jovenes.forEach(j => {
+                        let tomaMed = (j.med && j.med.toLowerCase() !== 'ninguno' && j.med.trim() !== '') || (j.horas && j.horas.length > 0);
+                        let tieneAlergia = (j.alergia && j.alergia.toLowerCase() !== 'ninguna' && j.alergia.trim() !== '');
+                        if(tomaMed || tieneAlergia) {
+                            hay = true;
+                            texto += `GRUPO ${g} - ${j.nombre}\n`;
+                            if(tieneAlergia) texto += `  Alergia: ${j.alergia}\n`;
+                            if(tomaMed) texto += `  Medicamento: ${j.med} (Horarios: ${(j.horas||[]).join(', ')})\n`;
+                            texto += `  Tutor: ${j.contacto} - Cel: ${j.celular}\n\n`;
+                        }
+                    });
+                }
+            }
+            if(!hay) texto += "No hay registros medicos.";
+            let blob = new Blob([texto], { type: "text/plain;charset=utf-8" });
+            let url = URL.createObjectURL(blob);
+            let a = document.createElement("a");
+            a.href = url;
+            a.download = "Reporte_Medico_Retiro_2026.txt";
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
         function enviarMasivo(tipo) {
             let todosLosJovenes = [];
             for(let g in baseDatos.grupos) {
@@ -705,11 +819,12 @@
             tbodyPagos.innerHTML = '';
             selectAbono.innerHTML = '';
 
+            // Los catequistas y el admin pueden ver la columna de acciones en Salud
+            colAccionesHeader.classList.remove('hidden');
+            
             if(rol === 'admin') {
-                colAccionesHeader.classList.remove('hidden');
                 colAccionGasto.classList.remove('hidden');
             } else {
-                colAccionesHeader.classList.add('hidden');
                 colAccionGasto.classList.add('hidden');
             }
 
@@ -738,7 +853,7 @@
                 let grupoTag = rol === 'admin' ? `<span class="text-[9px] bg-rose-100 text-guindo px-1.5 py-0.5 rounded font-bold mr-1">G-${j.grupo}</span>` : '';
 
                 let linkWsp = `https://wa.me/52${(j.celular || '').replace(/\s+/g, '')}?text=Hola%20${encodeURIComponent(j.contacto || '')}`;
-                let tdAccionAdmin = rol === 'admin' ? `<td class="p-3 text-center"><button onclick="eliminarJoven('${j.nombre}', '${j.grupo || grupoNum}')" class="text-rose-500 p-2"><i class="fa-solid fa-trash"></i></button></td>` : '';
+                let tdAccionAdmin = `<td class="p-3 text-center"><button onclick="eliminarJoven('${j.nombre}', '${j.grupo || grupoNum}')" class="text-rose-500 p-2"><i class="fa-solid fa-trash"></i></button></td>`;
 
                 tbodySalud.innerHTML += `
                     <tr class="hover:bg-slate-50">
@@ -893,6 +1008,13 @@
     </script>
 </body>
 </html>
+
+
+
+
+
+
+
 
 
 
