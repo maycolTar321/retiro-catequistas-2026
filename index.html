@@ -341,13 +341,17 @@
         </div>
     </div>
 
+    <!-- MODAL EXPOSITOR CON SELECTOR DE ARCHIVO REAL -->
     <div id="modal-expositor" class="fixed inset-0 bg-slate-950/60 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
         <div class="bg-white rounded-[2.5rem] p-8 max-w-md w-full shadow-2xl space-y-4 text-xs">
             <h3 class="text-lg font-black text-slate-900">Agregar Expositor</h3>
             <form onsubmit="guardarExpositor(event)" class="space-y-3">
                 <div><label class="block font-bold text-slate-700 mb-1">Nombre Completo</label><input type="text" id="exp-nombre" required class="capitalized-text w-full p-3.5 rounded-2xl border border-slate-200 outline-none font-medium focus:ring-2 focus:ring-[#6a1b29]" placeholder="Ej. Padre Juan Pérez"></div>
                 <div><label class="block font-bold text-slate-700 mb-1">Tema / Charla</label><input type="text" id="exp-tema" required class="capitalized-text w-full p-3.5 rounded-2xl border border-slate-200 outline-none focus:ring-2 focus:ring-[#6a1b29]" placeholder="Ej. El llamado a la conversión"></div>
-                <div><label class="block font-bold text-slate-700 mb-1">Ruta de la Foto (Carpeta D:\RETIRO 2026)</label><input type="text" id="exp-foto" class="w-full p-3.5 rounded-2xl border border-slate-200 outline-none focus:ring-2 focus:ring-[#6a1b29]" placeholder="Ej. expositores/padre_juan.jpg"></div>
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1">Seleccionar Foto del Expositor</label>
+                    <input type="file" id="exp-file" accept="image/*" class="w-full p-2.5 rounded-2xl border border-slate-200 bg-slate-50 text-xs font-medium file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-guindo file:text-white hover:file:bg-[#55141f]">
+                </div>
                 <div class="flex space-x-2 pt-3">
                     <button type="button" onclick="cerrarModal('modal-expositor')" class="w-1/2 bg-slate-100 py-3.5 rounded-2xl font-bold hover:bg-slate-200 transition">Cancelar</button>
                     <button type="submit" class="w-1/2 bg-guindo text-white py-3.5 rounded-2xl font-bold shadow-lg shadow-rose-900/30 transition">Guardar</button>
@@ -408,9 +412,8 @@
         </div>
     </div>
 
-    <!-- SCRIPT DE FIREBASE Y LÓGICA EN TIEMPO REAL -->
+    <!-- SCRIPT DE FIREBASE Y LÓGICA -->
     <script>
-        // CONFIGURACIÓN DE FIREBASE (Reemplaza con tus credenciales del Paso 1 del manual)
         const firebaseConfig = {
             apiKey: "TU_API_KEY",
             authDomain: "tu-proyecto.firebaseapp.com",
@@ -436,7 +439,7 @@
                 { nombre: "Logística y Hospedaje", encargados: ["Carlos Mendoza"] }
             ],
             expositores: [
-                { nombre: "Padre Juan Pérez", tema: "El valor de la Eucaristía", foto: "expositores/padre_juan.jpg" }
+                { nombre: "Padre Juan Pérez", tema: "El valor de la Eucaristía", foto: "https://cdn-icons-png.flaticon.com/512/3135/3135715.png" }
             ],
             gastos: [
                 { id: 1, categoria: "Transporte", desc: "Alquiler de bus", monto: 1200 }
@@ -538,12 +541,11 @@
             if(!baseDatos.grupos[grupoNum]) baseDatos.grupos[grupoNum] = { jovenes: [] };
             baseDatos.grupos[grupoNum].jovenes.push({ nombre, alergia, med, horas, contacto, celular, pagado: 0, historial: [] });
 
-            // Sincronizar con Firebase Firestore
             db.collection("retiro_datos").doc("principal").set(baseDatos).then(() => {
                 cerrarModal('modal-joven');
                 document.getElementById('form-joven').reset();
                 document.getElementById('reloj-horas-med').innerHTML = '';
-                alert('¡Joven registrado y sincronizado en la nube!');
+                alert('✨ ¡Creación exitosa! Joven registrado correctamente.');
             });
         }
 
@@ -565,7 +567,7 @@
 
             db.collection("retiro_datos").doc("principal").set(baseDatos).then(() => {
                 cerrarModal('modal-abono');
-                alert('¡Pago actualizado en tiempo real!');
+                alert('✨ ¡Creación exitosa! Abono registrado correctamente.');
             });
         }
 
@@ -578,8 +580,7 @@
 
             db.collection("retiro_datos").doc("principal").set(baseDatos).then(() => {
                 cerrarModal('modal-comision');
-                renderizarComisiones();
-                alert('¡Comisión creada!');
+                alert('✨ ¡Creación exitosa! Comisión creada correctamente.');
             });
         }
 
@@ -587,14 +588,27 @@
             e.preventDefault();
             let nombre = document.getElementById('exp-nombre').value;
             let tema = document.getElementById('exp-tema').value;
-            let foto = document.getElementById('exp-foto').value || 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png';
-            baseDatos.expositores.push({ nombre, tema, foto });
-
-            db.collection("retiro_datos").doc("principal").set(baseDatos).then(() => {
-                cerrarModal('modal-expositor');
-                renderizarExpositores();
-                alert('¡Expositor agregado!');
-            });
+            let fileInput = document.getElementById('exp-file');
+            
+            let fotoUrl = "https://cdn-icons-png.flaticon.com/512/3135/3135715.png";
+            if(fileInput.files && fileInput.files[0]) {
+                let reader = new FileReader();
+                reader.onload = function(e) {
+                    fotoUrl = e.target.result; // Convierte la foto local a imagen visible
+                    baseDatos.expositores.push({ nombre, tema, foto: fotoUrl });
+                    db.collection("retiro_datos").doc("principal").set(baseDatos).then(() => {
+                        cerrarModal('modal-expositor');
+                        alert('✨ ¡Creación exitosa! Expositor agregado correctamente.');
+                    });
+                };
+                reader.readAsDataURL(fileInput.files[0]);
+            } else {
+                baseDatos.expositores.push({ nombre, tema, foto: fotoUrl });
+                db.collection("retiro_datos").doc("principal").set(baseDatos).then(() => {
+                    cerrarModal('modal-expositor');
+                    alert('✨ ¡Creación exitosa! Expositor agregado correctamente.');
+                });
+            }
         }
 
         function guardarGasto(e) {
@@ -606,8 +620,7 @@
 
             db.collection("retiro_datos").doc("principal").set(baseDatos).then(() => {
                 cerrarModal('modal-gasto');
-                renderizarGastos();
-                alert('¡Gasto registrado!');
+                alert('✨ ¡Creación exitosa! Gasto registrado correctamente.');
             });
         }
 
@@ -622,8 +635,7 @@
 
             db.collection("retiro_datos").doc("principal").set(baseDatos).then(() => {
                 cerrarModal('modal-actividad');
-                renderizarCronograma();
-                alert('¡Actividad programada!');
+                alert('✨ ¡Creación exitosa! Actividad programada correctamente.');
             });
         }
 
@@ -633,15 +645,13 @@
             document.getElementById('label-costo-base').innerText = costoBase.toFixed(2) + " Bs";
             cerrarModal('modal-precio');
             renderizarTodo();
-            alert('¡Costo base actualizado!');
+            alert('✨ ¡Actualización exitosa!');
         }
 
         function ponerCeroGastos() {
             if(confirm('¿Desea poner todos los gastos en cero?')) {
                 baseDatos.gastos = [];
-                db.collection("retiro_datos").doc("principal").set(baseDatos).then(() => {
-                    renderizarGastos();
-                });
+                db.collection("retiro_datos").doc("principal").set(baseDatos);
             }
         }
 
@@ -744,9 +754,7 @@
         function eliminarJoven(nombre, grupoG) {
             if(confirm('¿Eliminar a ' + nombre + '?')) {
                 baseDatos.grupos[grupoG].jovenes = baseDatos.grupos[grupoG].jovenes.filter(j => j.nombre !== nombre);
-                db.collection("retiro_datos").doc("principal").set(baseDatos).then(() => {
-                    renderizarTodo();
-                });
+                db.collection("retiro_datos").doc("principal").set(baseDatos);
             }
         }
 
@@ -756,7 +764,7 @@
             grid.innerHTML = '';
             baseDatos.comisiones.forEach((c, index) => {
                 let encHtml = c.encargados.map(en => `<div class="flex items-center space-x-2"><i class="fa-solid fa-user-check text-emerald-500"></i><span>${en}</span></div>`).join('');
-                let btnEliminar = rol === 'admin' ? `<button onclick="baseDatos.comisiones.splice(${index}, 1); db.collection('retiro_datos').doc('principal').set(baseDatos).then(() => renderizarComisiones());" class="text-rose-500 hover:text-rose-700 text-xs font-bold"><i class="fa-solid fa-trash"></i> Eliminar</button>` : '';
+                let btnEliminar = rol === 'admin' ? `<button onclick="baseDatos.comisiones.splice(${index}, 1); db.collection('retiro_datos').doc('principal').set(baseDatos);" class="text-rose-500 hover:text-rose-700 text-xs font-bold"><i class="fa-solid fa-trash"></i> Eliminar</button>` : '';
                 grid.innerHTML += `
                     <div class="bg-white p-7 rounded-[2.5rem] shadow-sm border border-slate-200 space-y-3 relative">
                         <div class="flex justify-between items-center">
@@ -793,7 +801,7 @@
             let tbody = document.getElementById('tabla-gastos-body');
             tbody.innerHTML = '';
             baseDatos.gastos.forEach(g => {
-                let tdAccionGasto = rol === 'admin' ? `<td class="p-4 text-center"><button onclick="baseDatos.gastos = baseDatos.gastos.filter(x => x.id !== ${g.id}); db.collection('retiro_datos').doc('principal').set(baseDatos).then(() => renderizarGastos());" class="text-rose-500 hover:text-rose-700 p-2"><i class="fa-solid fa-trash"></i></button></td>` : '';
+                let tdAccionGasto = rol === 'admin' ? `<td class="p-4 text-center"><button onclick="baseDatos.gastos = baseDatos.gastos.filter(x => x.id !== ${g.id}); db.collection('retiro_datos').doc('principal').set(baseDatos);" class="text-rose-500 hover:text-rose-700 p-2"><i class="fa-solid fa-trash"></i></button></td>` : '';
                 tbody.innerHTML += `
                     <tr class="hover:bg-slate-50/80 transition">
                         <td class="p-4 font-bold text-guindo">${g.categoria}</td>
@@ -825,14 +833,12 @@
             });
         }
 
-        // SINCRONIZACIÓN EN TIEMPO REAL CON FIREBASE
         window.onload = function() {
             db.collection("retiro_datos").doc("principal").onSnapshot((doc) => {
                 if (doc.exists) {
                     baseDatos = doc.data();
                     renderizarTodo();
                 } else {
-                    // Inicializar si está vacío
                     db.collection("retiro_datos").doc("principal").set(baseDatos);
                 }
             });
