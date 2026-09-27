@@ -528,7 +528,7 @@
             let horas = [];
             document.querySelectorAll('.input-hora-med').forEach(i => { if(i.value) horas.push(i.value); });
 
-            if(!baseDatos.grupos[grupoNum]) baseDatos.grupos[grupoNum] = { jovenes: [] };
+            if(!baseDatos.grupos) baseDatos.grupos = {}; if(!baseDatos.grupos[grupoNum]) baseDatos.grupos[grupoNum] = { jovenes: [] }; if(!baseDatos.grupos[grupoNum].jovenes) baseDatos.grupos[grupoNum].jovenes = [];
             baseDatos.grupos[grupoNum].jovenes.push({ nombre, alergia, med, horas, contacto, celular, pagado: 0, historial: [] });
 
             guardarDatos().then(() => {
@@ -682,7 +682,17 @@
             window.open(urlWsp, '_blank');
         }
 
+                function repararBaseDatos() {
+            if (!baseDatos) baseDatos = {};
+            if (!baseDatos.grupos) baseDatos.grupos = {};
+            if (!baseDatos.comisiones) baseDatos.comisiones = [];
+            if (!baseDatos.expositores) baseDatos.expositores = [];
+            if (!baseDatos.gastos) baseDatos.gastos = [];
+            if (!baseDatos.cronograma) baseDatos.cronograma = [];
+        }
+
         function renderizarTodo() {
+            repararBaseDatos();
             let rol = document.getElementById('select-rol').value;
             let grupoNum = document.getElementById('select-grupo').value;
             let tbodySalud = document.getElementById('tabla-jovenes-body');
@@ -883,6 +893,8 @@
     </script>
 </body>
 </html>
+
+
 
 
 
