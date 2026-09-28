@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
@@ -12,7 +12,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <style>
         .capitalized-text { text-transform: capitalize; }
-        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: #f1f5f9; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 9999px; }
         .bg-guindo { background-color: #581823; }
@@ -20,131 +20,170 @@
         .text-guindo { color: #581823; }
         .border-guindo { border-color: #581823; }
         .focus\:ring-guindo:focus { --tw-ring-color: #581823; }
+        
+        @keyframes fadeInScale {
+            0% { opacity: 0; transform: scale(0.9); }
+            100% { opacity: 1; transform: scale(1); }
+        }
+        .animate-welcome {
+            animation: fadeInScale 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
     </style>
 </head>
-<body class="bg-slate-100 text-slate-800 font-sans antialiased min-h-screen flex flex-col pb-24">
+<body class="bg-slate-100 text-slate-800 font-sans antialiased min-h-screen flex flex-col pb-28">
+
     <!-- LOGIN DE ADMINISTRADOR -->
-    <div id="modal-login" class="fixed inset-0 bg-slate-950/75 backdrop-blur-md hidden flex items-center justify-center p-4 z-50">
-        <div class="bg-white rounded-[2rem] p-6 sm:p-8 max-w-sm w-full shadow-2xl space-y-5 border border-slate-100 text-center">
-            <div class="w-16 h-16 bg-gradient-to-tr from-[#581823] to-[#7a2331] text-amber-300 rounded-2xl mx-auto flex items-center justify-center text-2xl shadow-lg overflow-hidden border-2 border-white">
+    <div id="modal-login" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md hidden flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-[2.5rem] p-8 max-w-sm w-full shadow-2xl space-y-5 border border-slate-100 text-center">
+            <div class="w-20 h-20 bg-gradient-to-tr from-[#581823] to-[#7a2331] text-amber-300 rounded-3xl mx-auto flex items-center justify-center text-3xl shadow-xl overflow-hidden border-4 border-white">
                 <img src="logo.jpg" alt="Logo" onerror="this.onerror=null;this.src='https://cdn-icons-png.flaticon.com/512/330/330447.png';" class="w-full h-full object-cover">
             </div>
             <div>
-                <h3 class="text-lg font-black text-slate-900">Acceso de Coordinación</h3>
-                <p class="text-xs text-slate-500 mt-1">Ingresa la contraseña admin (<code class="bg-slate-100 px-1.5 py-0.5 rounded text-guindo font-bold">confir2026</code>)</p>
+                <h3 class="text-xl font-black text-slate-900">Acceso de Coordinación</h3>
+                <p class="text-xs text-slate-500 mt-1">Ingresa la contraseña de administrador.</p>
             </div>
             <form onsubmit="validarLoginAdmin(event)" class="space-y-4 text-left">
                 <div>
-                    <label class="block text-xs font-bold text-slate-700 mb-1">Contraseña Admin</label>
+                    <label class="block text-xs font-bold text-slate-700 mb-1.5 uppercase tracking-wider">Contraseña Admin</label>
                     <div class="relative flex items-center">
-                        <input type="password" id="input-pass-admin" required class="w-full p-3.5 pr-12 rounded-xl border border-slate-200 outline-none text-sm font-bold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-[#581823]" placeholder="••••••••">
+                        <input type="password" id="input-pass-admin" required class="w-full p-4 pr-12 rounded-2xl border border-slate-200 outline-none text-base font-bold bg-slate-50 focus:bg-white focus:ring-2 focus:ring-[#581823] shadow-inner" placeholder="••••••••">
                         <button type="button" onclick="togglePassword()" class="absolute right-4 text-slate-400 hover:text-guindo focus:outline-none">
-                            <i id="icono-ojo" class="fa-solid fa-eye"></i>
+                            <i id="icono-ojo" class="fa-solid fa-eye text-lg"></i>
                         </button>
                     </div>
                 </div>
-                <div class="flex space-x-2 pt-2">
-                    <button type="button" onclick="cancelarLogin()" class="w-1/2 bg-slate-100 text-slate-600 font-bold py-3 rounded-xl text-xs">Cancelar</button>
-                    <button type="submit" class="w-1/2 bg-guindo text-white font-bold py-3 rounded-xl text-xs shadow-md">Ingresar</button>
+                <div class="flex space-x-3 pt-2">
+                    <button type="button" onclick="cancelarLogin()" class="w-1/2 bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold py-3.5 rounded-2xl text-sm transition shadow-sm">Cancelar</button>
+                    <button type="submit" class="w-1/2 bg-guindo hover:bg-[#44121b] text-white font-bold py-3.5 rounded-2xl text-sm shadow-lg transition">Ingresar</button>
                 </div>
             </form>
         </div>
     </div>
 
+    <!-- MODAL DE BIENVENIDA ANIMADO -->
+    <div id="modal-bienvenida" class="fixed inset-0 bg-slate-950/80 backdrop-blur-md hidden flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-[2.5rem] p-8 max-w-sm w-full shadow-2xl space-y-6 border border-slate-100 text-center animate-welcome">
+            <div class="w-20 h-20 bg-gradient-to-tr from-[#581823] to-[#7a2331] text-amber-300 rounded-3xl mx-auto flex items-center justify-center text-3xl shadow-xl overflow-hidden border-4 border-white animate-bounce">
+                <i class="fa-solid fa-crown text-amber-300"></i>
+            </div>
+            <div>
+                <h3 class="text-xl font-black text-slate-900">¡Bienvenida Coordinadora!</h3>
+                <p class="text-sm text-slate-500 mt-1">Acceso de administración concedido con éxito.</p>
+            </div>
+            <div class="pt-2">
+                <button type="button" onclick="cerrarBienvenida()" class="w-full bg-guindo hover:bg-[#44121b] text-white font-bold py-3.5 rounded-2xl text-sm shadow-lg transition">Entrar al Panel</button>
+            </div>
+        </div>
+    </div>
+
     <!-- HEADER RESPONSIVO Y MODERNO -->
-    <header class="bg-gradient-to-r from-[#44121b] via-[#581823] to-slate-900 text-white shadow-xl sticky top-0 z-40 border-b border-rose-950/30">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex flex-col gap-4">
-            <div class="flex flex-col sm:flex-row justify-between items-center gap-3">
-                <div class="flex items-center space-x-3 w-full sm:w-auto">
-                    <div class="w-11 h-11 rounded-xl bg-white/10 flex items-center justify-center text-amber-300 text-lg font-bold border border-white/20 overflow-hidden flex-shrink-0">
+    <header class="bg-gradient-to-r from-[#44121b] via-[#581823] to-slate-900 text-white shadow-2xl sticky top-0 z-40 border-b border-rose-950/40">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 py-5 flex flex-col gap-5">
+            <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
+                <div class="flex items-center space-x-3.5 w-full sm:w-auto">
+                    <div class="w-14 h-14 rounded-2xl bg-white/10 flex items-center justify-center text-amber-300 text-xl font-bold border-2 border-white/20 overflow-hidden flex-shrink-0 shadow-lg">
                         <img id="img-logo-parroquia" src="logo.jpg" alt="Logo" onerror="this.onerror=null;this.src='https://cdn-icons-png.flaticon.com/512/330/330447.png';" class="w-full h-full object-cover">
                     </div>
                     <div>
-                        <h1 class="text-sm sm:text-base font-black tracking-tight leading-tight">Retiro Catequistas <span class="text-[9px] bg-amber-400 text-slate-950 px-1.5 py-0.5 rounded uppercase font-extrabold">San Martín</span></h1>
-                        <p class="text-[11px] text-rose-200">Panel en Tiempo Real (Firebase)</p>
+                        <h1 class="text-base sm:text-lg font-black tracking-tight leading-tight">Retiro Catequistas <span class="text-[10px] bg-amber-400 text-slate-950 px-2 py-0.5 rounded-full uppercase font-black ml-1 shadow">San Martín</span></h1>
+                        <p class="text-xs text-rose-200 mt-0.5 flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span> Panel en Tiempo Real (Firebase)</p>
                     </div>
                 </div>
                 
-                <div class="flex items-center gap-2 w-full sm:w-auto justify-end">
-                    <div class="flex items-center space-x-2 bg-white/10 px-4 py-2 rounded-2xl border border-white/20 text-sm shadow-sm hover:bg-white/20 transition cursor-pointer">
-                        <span class="font-black text-rose-200">MODO:</span>
-                        <select id="select-rol" onchange="cambiarRolSistema()" class="bg-[#44121b] text-white font-bold text-sm px-3 py-1.5 rounded-xl border border-rose-800 outline-none shadow-inner cursor-pointer hover:bg-[#5a1824] transition">
+                <div class="flex items-center gap-3 w-full sm:w-auto justify-end">
+                    <div class="flex items-center space-x-2 bg-white/10 px-3.5 py-2 rounded-2xl border border-white/15 text-sm shadow-inner">
+                        <span class="font-bold text-rose-200 text-xs uppercase">MODO:</span>
+                        <select id="select-rol" onchange="cambiarRolSistema()" class="bg-[#44121b] text-white font-black text-sm px-3 py-1.5 rounded-xl border border-rose-700 outline-none cursor-pointer shadow">
                             <option value="catequista">Catequista</option>
                             <option value="admin">Admin</option>
                         </select>
                     </div>
-                    <div id="contenedor-selector-grupo" class="flex items-center space-x-2 bg-white/10 px-4 py-2 rounded-2xl border border-white/20 text-sm shadow-sm hover:bg-white/20 transition cursor-pointer">
-                        <span class="font-black text-rose-200">GRUPO:</span>
-                        <select id="select-grupo" onchange="renderizarTodo()" class="bg-[#44121b] text-white font-bold text-sm px-3 py-1.5 rounded-xl border border-rose-800 outline-none shadow-inner cursor-pointer hover:bg-[#5a1824] transition">
+                    <div id="contenedor-selector-grupo" class="flex items-center space-x-2 bg-white/10 px-3.5 py-2 rounded-2xl border border-white/15 text-sm shadow-inner">
+                        <span class="font-bold text-rose-200 text-xs uppercase">GRUPO:</span>
+                        <select id="select-grupo" onchange="renderizarTodo()" class="bg-[#44121b] text-white font-black text-sm px-3 py-1.5 rounded-xl border border-rose-700 outline-none cursor-pointer shadow">
                             <option value="1">G-1</option><option value="2">G-2</option><option value="3" selected>G-3</option><option value="4">G-4</option><option value="5">G-5</option><option value="6">G-6</option><option value="7">G-7</option>
                         </select>
                     </div>
                 </div>
             </div>
             
-            <div class="flex overflow-x-auto space-x-2 pb-1 scrollbar-none">
-                <button onclick="switchTab('salud')" id="btn-salud" class="tab-btn px-5 py-3 rounded-2xl text-[14px] font-bold transition flex items-center space-x-2 bg-white text-[#581823] shadow-lg transform scale-105 whitespace-nowrap flex-shrink-0">
-                    <i class="fa-solid fa-heart-pulse text-rose-600"></i><span>Jóvenes y Salud</span>
-                </button>
-                <button onclick="switchTab('pagos')" id="btn-pagos" class="tab-btn px-5 py-3 rounded-2xl text-[14px] font-bold transition flex items-center space-x-2 text-rose-100 hover:bg-white/20 hover:-translate-y-0.5 whitespace-nowrap flex-shrink-0">
-                    <i class="fa-solid fa-wallet text-emerald-400"></i><span>Cobros</span>
-                </button>
-                <button onclick="switchTab('comisiones')" id="btn-comisiones" class="tab-btn px-5 py-3 rounded-2xl text-[14px] font-bold transition flex items-center space-x-2 text-rose-100 hover:bg-white/20 hover:-translate-y-0.5 whitespace-nowrap flex-shrink-0">
-                    <i class="fa-solid fa-users-gear text-amber-400"></i><span>Comisiones</span>
-                </button>
-                <button onclick="switchTab('expositores')" id="btn-expositores" class="tab-btn px-5 py-3 rounded-2xl text-[14px] font-bold transition flex items-center space-x-2 text-rose-100 hover:bg-white/20 hover:-translate-y-0.5 whitespace-nowrap flex-shrink-0">
-                    <i class="fa-solid fa-chalkboard-user text-rose-300"></i><span>Expositores</span>
-                </button>
-                <button onclick="switchTab('gastos')" id="btn-gastos" class="tab-btn px-5 py-3 rounded-2xl text-[14px] font-bold transition flex items-center space-x-2 text-rose-100 hover:bg-white/20 hover:-translate-y-0.5 whitespace-nowrap flex-shrink-0">
-                    <i class="fa-solid fa-chart-pie text-sky-400"></i><span>Caja y Gastos</span>
-                </button>
-                <button onclick="switchTab('cronograma')" id="btn-cronograma" class="tab-btn px-5 py-3 rounded-2xl text-[14px] font-bold transition flex items-center space-x-2 text-rose-100 hover:bg-white/20 hover:-translate-y-0.5 whitespace-nowrap flex-shrink-0">
-                    <i class="fa-solid fa-clock text-amber-300"></i><span>Cronograma</span>
-                </button>
+            <!-- PESTAÑAS DE NAVEGACIÓN -->
+            <div class="flex flex-col md:flex-row gap-3 items-start md:items-center justify-between">
+                <div class="flex overflow-x-auto space-x-3 pb-1 scrollbar-none w-full md:w-auto">
+                    <button onclick="switchTab('salud')" id="btn-salud" class="tab-btn px-5 py-3 rounded-2xl text-sm font-bold transition flex items-center space-x-2.5 bg-white text-[#581823] shadow-xl whitespace-nowrap flex-shrink-0">
+                        <i class="fa-solid fa-kit-medical text-rose-600 text-base"></i><span>Jóvenes y Salud</span>
+                    </button>
+                    <button onclick="switchTab('pagos')" id="btn-pagos" class="tab-btn px-5 py-3 rounded-2xl text-sm font-bold transition flex items-center space-x-2.5 text-rose-100 hover:bg-white/10 whitespace-nowrap flex-shrink-0">
+                        <i class="fa-solid fa-file-invoice-dollar text-emerald-400 text-base"></i><span>Cobros</span>
+                    </button>
+                    <button onclick="switchTab('comisiones')" id="btn-comisiones" class="tab-btn px-5 py-3 rounded-2xl text-sm font-bold transition flex items-center space-x-2.5 text-rose-100 hover:bg-white/10 whitespace-nowrap flex-shrink-0">
+                        <i class="fa-solid fa-user-group text-amber-400 text-base"></i><span>Comisiones</span>
+                    </button>
+                    <button onclick="switchTab('expositores')" id="btn-expositores" class="tab-btn px-5 py-3 rounded-2xl text-sm font-bold transition flex items-center space-x-2.5 text-rose-100 hover:bg-white/10 whitespace-nowrap flex-shrink-0">
+                        <i class="fa-solid fa-microphone-lines text-rose-300 text-base"></i><span>Expositores</span>
+                    </button>
+                    <button onclick="switchTab('gastos')" id="btn-gastos" class="hidden tab-btn tab-admin-only px-5 py-3 rounded-2xl text-sm font-bold transition flex items-center space-x-2.5 text-rose-100 hover:bg-white/10 whitespace-nowrap flex-shrink-0 hidden">
+                        <i class="fa-solid fa-vault text-sky-400 text-base"></i><span>Caja y Gastos</span>
+                    </button>
+                    <button onclick="switchTab('cronograma')" id="btn-cronograma" class="tab-btn px-5 py-3 rounded-2xl text-sm font-bold transition flex items-center space-x-2.5 text-rose-100 hover:bg-white/10 whitespace-nowrap flex-shrink-0">
+                        <i class="fa-solid fa-calendar-days text-amber-300 text-base"></i><span>Cronograma</span>
+                    </button>
+                </div>
+                
+                <div class="flex items-center gap-2 flex-shrink-0 w-full md:w-auto justify-end pb-1">
+                    <button onclick="exportarBackup()" title="Descargar Copia de Respaldo" class="bg-white/10 hover:bg-white/20 text-amber-300 font-bold px-3.5 py-2.5 rounded-2xl text-xs border border-white/20 transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-cloud-arrow-down"></i> <span class="hidden sm:inline">Respaldar</span>
+                    </button>
+                    <label title="Restaurar de Respaldo" class="bg-white/10 hover:bg-white/20 text-emerald-300 font-bold px-3.5 py-2.5 rounded-2xl text-xs border border-white/20 transition flex items-center gap-1.5 cursor-pointer">
+                        <i class="fa-solid fa-cloud-arrow-up"></i> <span class="hidden sm:inline">Restaurar</span>
+                        <input type="file" id="input-archivo-backup" accept=".json" onchange="importarBackup(event)" class="hidden">
+                    </label>
+                </div>
             </div>
         </div>
     </header>
+
     <!-- CONTENIDO PRINCIPAL -->
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 py-6 flex-grow w-full space-y-6">
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 py-8 flex-grow w-full space-y-8">
 
         <!-- SALUD -->
-        <section id="tab-salud" class="tab-content space-y-4">
-            <div id="panel-avisos-masivos" class="hidden bg-gradient-to-r from-[#44121b] to-teal-900 text-white p-5 rounded-3xl shadow-lg flex flex-col sm:flex-row justify-between items-center gap-3 border border-rose-800/30">
+        <section id="tab-salud" class="tab-content space-y-6">
+            <div id="panel-avisos-masivos" class="hidden bg-gradient-to-r from-[#44121b] to-teal-900 text-white p-6 rounded-[2rem] shadow-xl flex flex-col sm:flex-row justify-between items-center gap-4 border border-rose-800/40">
                 <div>
-                    <span class="bg-amber-400 text-slate-950 text-[9px] font-black px-2 py-0.5 rounded uppercase">Admin</span>
-                    <h3 class="text-sm font-black mt-1">Difusión Masiva a Papás</h3>
-                    <p class="text-xs text-rose-200">Avisos rápidos vía WhatsApp.</p>
+                    <span class="bg-amber-400 text-slate-950 text-[10px] font-black px-2.5 py-1 rounded-full uppercase tracking-wider">Admin</span>
+                    <h3 class="text-base font-black mt-2">Difusión Masiva a Papás</h3>
+                    <p class="text-sm text-rose-200">Avisos rápidos vía WhatsApp para todos los tutores.</p>
                 </div>
-                <div class="flex gap-2 w-full sm:w-auto flex-wrap justify-end">
-                    <button onclick="enviarMasivo('llegada')" class="flex-1 sm:flex-none bg-gradient-to-r from-emerald-500 to-emerald-700 hover:from-emerald-400 hover:to-emerald-600 text-white font-bold px-3.5 py-2 rounded-xl text-xs shadow-lg transform transition hover:scale-105"><i class="fa-brands fa-whatsapp mr-1"></i> Llegada</button>
-                    <button onclick="enviarMasivo('salida')" class="flex-1 sm:flex-none bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-amber-950 font-black px-3.5 py-2 rounded-xl text-xs shadow-lg transform transition hover:scale-105"><i class="fa-brands fa-whatsapp mr-1"></i> Salida</button>
+                <div class="flex gap-3 w-full sm:w-auto flex-wrap justify-end">
+                    <button onclick="enviarMasivo('llegada')" class="flex-1 sm:flex-none bg-emerald-600 hover:bg-emerald-700 text-white font-black px-5 py-3 rounded-2xl text-sm shadow-md transition flex items-center justify-center gap-2"><i class="fa-brands fa-whatsapp text-lg"></i> Llegada</button>
+                    <button onclick="enviarMasivo('salida')" class="flex-1 sm:flex-none bg-amber-500 hover:bg-amber-600 text-slate-950 font-black px-5 py-3 rounded-2xl text-sm shadow-md transition flex items-center justify-center gap-2"><i class="fa-brands fa-whatsapp text-lg"></i> Salida</button>
                 </div>
             </div>
 
-            <div class="bg-white p-5 rounded-3xl shadow-sm border border-slate-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+            <div class="bg-white p-6 sm:p-8 rounded-[2rem] shadow-sm border border-slate-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
-                    <h2 id="titulo-salud" class="text-lg font-black text-slate-900">Ficha Médica y Medicamentos</h2>
-                    <p class="text-xs text-slate-500">Control de alergias y horarios.</p>
+                    <h2 id="titulo-salud" class="text-xl font-black text-slate-900">Ficha Médica y Medicamentos</h2>
+                    <p class="text-sm text-slate-500 mt-0.5">Control exhaustivo de alergias y horarios de toma.</p>
                 </div>
-                <div class="w-full sm:w-auto flex flex-col sm:flex-row gap-2">
-                    <button onclick="verReporteMedicos()" class="w-full sm:w-auto bg-gradient-to-r from-rose-500 to-rose-700 hover:from-rose-400 hover:to-rose-600 text-white font-bold px-4 py-3 rounded-2xl text-[13px] shadow-lg transform transition hover:scale-105 flex items-center justify-center space-x-2">
-                        <i class="fa-solid fa-notes-medical"></i><span>Alertas Médicas</span>
+                <div class="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+                    <button onclick="verReporteMedicos()" class="bg-rose-600 hover:bg-rose-700 text-white font-bold px-5 py-3.5 rounded-2xl text-sm shadow-md flex items-center justify-center space-x-2 transition">
+                        <i class="fa-solid fa-notes-medical text-base"></i><span>Ver Alertas Médicas (Todos)</span>
                     </button>
-                    <button onclick="abrirModal('modal-joven')" class="w-full sm:w-auto bg-gradient-to-r from-rose-800 to-rose-950 hover:from-rose-700 hover:to-rose-900 text-white font-bold px-4 py-3 rounded-2xl text-[13px] shadow-lg transform transition hover:scale-105 flex items-center justify-center space-x-2">
-                        <i class="fa-solid fa-user-plus"></i><span>+ Agregar Joven</span>
+                    <button onclick="abrirModal('modal-joven')" class="bg-guindo hover:bg-[#44121b] text-white font-bold px-5 py-3.5 rounded-2xl text-sm shadow-md flex items-center justify-center space-x-2 transition">
+                        <i class="fa-solid fa-user-plus text-base"></i><span>+ Agregar Joven</span>
                     </button>
                 </div>
             </div>
-            <div class="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden p-2">
+            <div class="bg-white rounded-[2rem] shadow-sm border border-slate-200 overflow-hidden p-4">
                 <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse text-xs">
+                    <table class="w-full text-left border-collapse text-sm">
                         <thead class="bg-slate-50 text-slate-500 font-bold border-b">
                             <tr>
-                                <th class="p-3">Participante</th>
-                                <th class="p-3">Alergias</th>
-                                <th class="p-3">Medicamento / Horarios</th>
-                                <th class="p-3">WhatsApp Tutor</th>
-                                <th id="col-header-acciones" class="p-3 text-center hidden">Acción</th>
+                                <th class="p-4">Participante</th>
+                                <th class="p-4">Alergias</th>
+                                <th class="p-4">Medicamento / Horarios</th>
+                                <th class="p-4">WhatsApp Tutor</th>
+                                <th id="col-header-acciones" class="p-4 text-center">Acción</th>
                             </tr>
                         </thead>
                         <tbody id="tabla-jovenes-body" class="divide-y divide-slate-100"></tbody>
@@ -154,40 +193,43 @@
         </section>
 
         <!-- PAGOS -->
-        <section id="tab-pagos" class="tab-content hidden space-y-4">
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div class="bg-white p-5 rounded-3xl shadow-sm border flex justify-between items-center">
+        <section id="tab-pagos" class="tab-content hidden space-y-6">
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
+                <div class="bg-white p-6 rounded-[2rem] shadow-sm border flex justify-between items-center">
                     <div>
-                        <p class="text-[11px] font-bold text-slate-400 uppercase">Costo Base</p>
-                        <p id="label-costo-base" class="text-2xl font-black text-slate-900 mt-0.5">80.00 Bs</p>
+                        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Costo Base</p>
+                        <p id="label-costo-base" class="text-2xl sm:text-3xl font-black text-slate-900 mt-1">80.00 Bs</p>
                     </div>
-                    <button id="btn-editar-precio" onclick="abrirModal('modal-precio')" class="hidden bg-rose-50 text-guindo p-2.5 rounded-xl text-xs font-bold"><i class="fa-solid fa-pen"></i></button>
+                    <button id="btn-editar-precio" onclick="abrirModal('modal-precio')" class="hidden bg-rose-50 hover:bg-rose-100 text-guindo p-3 rounded-2xl text-sm font-bold transition shadow-sm"><i class="fa-solid fa-pen text-base"></i></button>
                 </div>
-                <div class="bg-white p-5 rounded-3xl shadow-sm border">
-                    <p class="text-[11px] font-bold text-slate-400 uppercase">Recaudado</p>
-                    <p id="stat-recaudado" class="text-2xl font-black text-emerald-600 mt-0.5">0.00 Bs</p>
+                <div class="bg-white p-6 rounded-[2rem] shadow-sm border">
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Recaudado</p>
+                    <p id="stat-recaudado" class="text-2xl sm:text-3xl font-black text-emerald-600 mt-1">0.00 Bs</p>
                 </div>
-                <div class="bg-white p-5 rounded-3xl shadow-sm border">
-                    <p class="text-[11px] font-bold text-slate-400 uppercase">Saldo Pendiente</p>
-                    <p id="stat-pendiente" class="text-2xl font-black text-amber-600 mt-0.5">0.00 Bs</p>
+                <div class="bg-white p-6 rounded-[2rem] shadow-sm border">
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Saldo Pendiente</p>
+                    <p id="stat-pendiente" class="text-2xl sm:text-3xl font-black text-amber-600 mt-1">0.00 Bs</p>
                 </div>
             </div>
 
-            <div class="bg-white rounded-3xl shadow-sm border p-5 space-y-4">
-                <div class="flex justify-between items-center">
-                    <h2 id="titulo-pagos" class="text-lg font-black text-slate-900">Control de Cobros</h2>
-                    <button onclick="abrirModal('modal-abono')" class="bg-gradient-to-r from-emerald-500 to-emerald-700 hover:from-emerald-400 hover:to-emerald-600 text-white font-bold px-4 py-3 rounded-2xl text-[13px] shadow-lg transform transition hover:scale-105">+ Abono</button>
+            <div class="bg-white rounded-[2rem] shadow-sm border p-6 sm:p-8 space-y-6">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                    <div>
+                        <h2 id="titulo-pagos" class="text-xl font-black text-slate-900">Control de Cobros</h2>
+                        <p class="text-sm text-slate-500 mt-0.5">Seguimiento de abonos parciales y saldos pendientes.</p>
+                    </div>
+                    <button onclick="abrirModal('modal-abono')" class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-5 py-3.5 rounded-2xl text-sm shadow-md transition flex items-center gap-2"><i class="fa-solid fa-cash-register"></i> + Registrar Abono / Pago</button>
                 </div>
                 <div class="overflow-x-auto">
-                    <table class="w-full text-left border-collapse text-xs">
+                    <table class="w-full text-left border-collapse text-sm">
                         <thead class="bg-slate-50 text-slate-500 font-bold border-b">
                             <tr>
-                                <th class="p-3">Participante</th>
-                                <th class="p-3">Historial</th>
-                                <th class="p-3">Pagado</th>
-                                <th class="p-3">Pendiente</th>
-                                <th class="p-3 text-center">Estado</th>
-                                <th class="p-3 text-center">Acción</th>
+                                <th class="p-4">Participante</th>
+                                <th class="p-4">Historial de Abonos y Fechas</th>
+                                <th class="p-4">Pagado</th>
+                                <th class="p-4">Debe (Pendiente)</th>
+                                <th class="p-4 text-center">Estado</th>
+                                <th class="p-4 text-center">Acción / Editar</th>
                             </tr>
                         </thead>
                         <tbody id="tabla-pagos-body" class="divide-y divide-slate-100"></tbody>
@@ -197,56 +239,56 @@
         </section>
 
         <!-- COMISIONES -->
-        <section id="tab-comisiones" class="tab-content hidden space-y-4">
-            <div class="bg-white p-5 rounded-3xl shadow-sm border flex justify-between items-center">
+        <section id="tab-comisiones" class="tab-content hidden space-y-6">
+            <div class="bg-white p-6 sm:p-8 rounded-[2rem] shadow-sm border flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
-                    <h2 class="text-lg font-black text-slate-900">Comisiones</h2>
-                    <p class="text-xs text-slate-500">Equipos de trabajo.</p>
+                    <h2 class="text-xl font-black text-slate-900">Comisiones</h2>
+                    <p class="text-sm text-slate-500 mt-0.5">Distribución de equipos y responsabilidades de trabajo.</p>
                 </div>
-                <button id="btn-nueva-comision" onclick="abrirModal('modal-comision')" class="hidden bg-amber-600 text-white font-bold px-4 py-3 rounded-2xl text-xs shadow">+ Comisión</button>
+                <button id="btn-nueva-comision" onclick="abrirModal('modal-comision')" class="hidden bg-amber-600 hover:bg-amber-700 text-white font-bold px-5 py-3.5 rounded-2xl text-sm shadow-md transition flex items-center gap-2"><i class="fa-solid fa-users"></i> + Comisión</button>
             </div>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4" id="grid-comisiones"></div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="grid-comisiones"></div>
         </section>
 
         <!-- EXPOSITORES -->
-        <section id="tab-expositores" class="tab-content hidden space-y-4">
-            <div class="bg-white p-5 rounded-3xl shadow-sm border flex justify-between items-center">
+        <section id="tab-expositores" class="tab-content hidden space-y-6">
+            <div class="bg-white p-6 sm:p-8 rounded-[2rem] shadow-sm border flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
-                    <h2 class="text-lg font-black text-slate-900">Expositores</h2>
-                    <p class="text-xs text-slate-500">Ponentes del retiro.</p>
+                    <h2 class="text-xl font-black text-slate-900">Expositores</h2>
+                    <p class="text-sm text-slate-500 mt-0.5">Ponentes y temas principales del retiro.</p>
                 </div>
-                <button id="btn-nuevo-expositor" onclick="prepararNuevoExpositor()" class="hidden bg-guindo text-white font-bold px-4 py-3 rounded-2xl text-xs shadow">+ Expositor</button>
+                <button id="btn-nuevo-expositor" onclick="prepararNuevoExpositor()" class="hidden bg-guindo hover:bg-[#44121b] text-white font-bold px-5 py-3.5 rounded-2xl text-sm shadow-md transition flex items-center gap-2"><i class="fa-solid fa-microphone"></i> + Expositor</button>
             </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="grid-expositores"></div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="grid-expositores"></div>
         </section>
 
-        <!-- GASTOS -->
-        <section id="tab-gastos" class="tab-content hidden space-y-4">
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
-                <div class="bg-[#44121b] text-white p-5 rounded-3xl space-y-3 shadow">
-                    <h3 class="font-bold text-sm"><i class="fa-solid fa-handshake-angle text-amber-300 mr-1"></i> Hospedaje</h3>
-                    <p class="text-xs text-rose-100">84 personas a 15 Bs patrocinadas.</p>
-                    <div class="bg-white/10 p-3 rounded-xl border border-white/15 flex justify-between text-xs font-bold">
-                        <span>Ahorro:</span><span class="text-emerald-400">1,260.00 Bs</span>
+        <!-- GASTOS (EXCLUSIVO ADMIN) -->
+        <section id="tab-gastos" class="tab-content hidden space-y-6">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="bg-[#44121b] text-white p-6 sm:p-8 rounded-[2rem] space-y-4 shadow-xl">
+                    <h3 class="font-black text-base flex items-center gap-2"><i class="fa-solid fa-handshake-angle text-amber-300 text-lg"></i> Hospedaje Patrocinado</h3>
+                    <p class="text-sm text-rose-100 leading-relaxed">84 personas a 15 Bs cubiertas por patrocinio especial.</p>
+                    <div class="bg-white/10 p-4 rounded-2xl border border-white/15 flex justify-between text-sm font-bold shadow-inner">
+                        <span>Ahorro Total:</span><span class="text-emerald-400 text-base font-black">1,260.00 Bs</span>
                     </div>
                 </div>
-                <div class="bg-white p-5 rounded-3xl shadow-sm border space-y-4 lg:col-span-2">
-                    <div class="flex justify-between items-center">
-                        <h3 class="font-bold text-slate-900">Caja y Gastos</h3>
-                        <div id="controles-gastos-admin" class="hidden flex space-x-2">
-                            <button onclick="generarReporteFinanciero()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-3 py-2 rounded-xl text-xs shadow"><i class="fa-solid fa-file-pdf mr-1"></i> Reporte</button>
-                            <button onclick="abrirModal('modal-gasto')" class="bg-amber-600 text-white font-bold px-3 py-2 rounded-xl text-xs shadow">+ Gasto</button>
-                            <button onclick="ponerCeroGastos()" class="bg-rose-100 text-rose-700 font-bold px-3 py-2 rounded-xl text-xs">En Cero</button>
+                <div class="bg-white p-6 sm:p-8 rounded-[2rem] shadow-sm border space-y-6 lg:col-span-2">
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                        <h3 class="font-black text-lg text-slate-900">Caja y Gastos</h3>
+                        <div id="controles-gastos-admin" class="flex flex-wrap gap-2">
+                            <button onclick="generarReporteFinanciero()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold px-4 py-2.5 rounded-xl text-xs shadow transition"><i class="fa-solid fa-file-pdf mr-1"></i> Reporte</button>
+                            <button onclick="abrirModal('modal-gasto')" class="bg-amber-600 hover:bg-amber-700 text-white font-bold px-4 py-2.5 rounded-xl text-xs shadow transition">+ Gasto</button>
+                            <button onclick="ponerCeroGastos()" class="bg-rose-100 hover:bg-rose-200 text-rose-700 font-bold px-4 py-2.5 rounded-xl text-xs transition">En Cero</button>
                         </div>
                     </div>
                     <div class="overflow-x-auto">
-                        <table class="w-full text-left border-collapse text-xs">
+                        <table class="w-full text-left border-collapse text-sm">
                             <thead class="bg-slate-50 text-slate-500 font-bold border-b">
                                 <tr>
-                                    <th class="p-3">Categoría</th>
-                                    <th class="p-3">Descripción</th>
-                                    <th class="p-3">Monto</th>
-                                    <th id="col-header-gasto-accion" class="p-3 text-center hidden">Acción</th>
+                                    <th class="p-4">Categoría</th>
+                                    <th class="p-4">Descripción</th>
+                                    <th class="p-4">Monto</th>
+                                    <th id="col-header-gasto-accion" class="p-4 text-center">Acción</th>
                                 </tr>
                             </thead>
                             <tbody id="tabla-gastos-body" class="divide-y divide-slate-100"></tbody>
@@ -257,178 +299,246 @@
         </section>
 
         <!-- CRONOGRAMA -->
-        <section id="tab-cronograma" class="tab-content hidden space-y-4">
-            <div class="bg-white p-5 rounded-3xl shadow-sm border flex justify-between items-center">
+        <section id="tab-cronograma" class="tab-content hidden space-y-6">
+            <div class="bg-white p-6 sm:p-8 rounded-[2rem] shadow-sm border flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <div>
-                    <h2 class="text-lg font-black text-slate-900">Cronograma en Vivo</h2>
-                    <p class="text-xs text-slate-500">Agenda y horarios.</p>
+                    <h2 class="text-xl font-black text-slate-900">Cronograma en Vivo</h2>
+                    <p class="text-sm text-slate-500 mt-0.5">Agenda oficial y control de actividades.</p>
                 </div>
-                <button id="btn-nueva-actividad" onclick="abrirModal('modal-actividad')" class="hidden bg-guindo text-white font-bold px-4 py-3 rounded-2xl text-xs shadow">+ Actividad</button>
+                <button id="btn-nueva-actividad" onclick="abrirModal('modal-actividad')" class="hidden bg-guindo hover:bg-[#44121b] text-white font-bold px-5 py-3.5 rounded-2xl text-sm shadow-md transition flex items-center gap-2"><i class="fa-solid fa-calendar-plus"></i> + Actividad</button>
             </div>
-            <div class="space-y-3" id="lista-cronograma"></div>
+            <div class="space-y-4" id="lista-cronograma"></div>
         </section>
 
     </main>
+
     <!-- MODALES -->
     <div id="modal-joven" class="fixed inset-0 bg-slate-950/70 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
-        <div class="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl space-y-3 max-h-[90vh] overflow-y-auto text-xs">
-            <h3 class="text-base font-bold text-slate-900">Registrar Nuevo Joven</h3>
-            <form id="form-joven-reg" onsubmit="guardarJoven(event)" class="space-y-3">
-                <div><label class="block font-bold text-slate-700 mb-1">Nombre Completo</label><input type="text" id="j-nombre" required class="capitalized-text w-full p-3 rounded-xl border outline-none font-medium" placeholder="Mateo Benítez"></div>
-                <div><label class="block font-bold text-slate-700 mb-1">Condición Médica / Alergias</label><input type="text" id="j-alergia" class="capitalized-text w-full p-3 rounded-xl border outline-none" placeholder="Asma leve"></div>
+        <div class="bg-white rounded-[2rem] p-6 sm:p-8 max-w-md w-full shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto text-sm">
+            <h3 class="text-lg font-black text-slate-900">Registrar Nuevo Joven</h3>
+            <form id="form-joven-reg" onsubmit="guardarJoven(event)" class="space-y-4">
+                <div><label class="block font-bold text-slate-700 mb-1.5 text-xs uppercase">Nombre Completo</label><input type="text" id="j-nombre" required class="capitalized-text w-full p-3.5 rounded-2xl border outline-none font-medium shadow-inner" placeholder="Mateo Benítez"></div>
+                <div><label class="block font-bold text-slate-700 mb-1.5 text-xs uppercase">Condición Médica / Alergias</label><input type="text" id="j-alergia" class="capitalized-text w-full p-3.5 rounded-2xl border outline-none shadow-inner" placeholder="Asma leve"></div>
                 
-                <div class="bg-rose-50/60 p-3.5 rounded-2xl border border-rose-100 space-y-2">
-                    <label class="block font-bold text-guindo">Control de Medicamentos</label>
-                    <input type="text" id="j-med" class="capitalized-text w-full p-2.5 rounded-xl border bg-white outline-none" placeholder="Medicamento">
-                    <select id="j-dosis" onchange="generarRelojHorasMed()" class="w-full p-2.5 rounded-xl border bg-white outline-none font-bold">
+                <div class="bg-rose-50/70 p-4 rounded-2xl border border-rose-100 space-y-3">
+                    <label class="block font-bold text-guindo text-xs uppercase"><i class="fa-solid fa-pills mr-1"></i> Control de Medicamentos</label>
+                    <input type="text" id="j-med" class="capitalized-text w-full p-3 rounded-xl border bg-white outline-none shadow-inner text-xs" placeholder="Nombre del medicamento">
+                    <select id="j-dosis" onchange="generarRelojHorasMed()" class="w-full p-3 rounded-xl border bg-white outline-none font-bold text-xs">
                         <option value="0">Sin medicamento</option>
                         <option value="1">1 toma al día</option>
                         <option value="2">2 tomas al día</option>
                         <option value="3">3 tomas al día</option>
                     </select>
-                    <div id="reloj-horas-med" class="space-y-1 pt-1"></div>
+                    <div id="reloj-horas-med" class="space-y-2 pt-1"></div>
                 </div>
 
                 <div>
-                    <label class="block font-bold text-slate-700 mb-1">Contacto y WhatsApp</label>
-                    <div class="grid grid-cols-2 gap-2">
-                        <input type="text" id="j-contacto" required class="capitalized-text w-full p-3 rounded-xl border outline-none" placeholder="Nombre Tutor">
-                        <input type="tel" id="j-celular" required class="capitalized-text w-full p-3 rounded-xl border outline-none font-bold text-guindo" placeholder="72948392">
+                    <label class="block font-bold text-slate-700 mb-1.5 text-xs uppercase">Contacto y WhatsApp</label>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <input type="text" id="j-contacto" required class="capitalized-text w-full p-3.5 rounded-2xl border outline-none shadow-inner text-xs" placeholder="Nombre Tutor">
+                        <input type="tel" id="j-celular" required class="capitalized-text w-full p-3.5 rounded-2xl border outline-none font-bold text-guindo shadow-inner text-xs" placeholder="72948392">
                     </div>
                 </div>
-                <div class="flex space-x-2 pt-2">
-                    <button type="button" onclick="cerrarModal('modal-joven')" class="w-1/2 bg-slate-100 py-3 rounded-xl font-bold">Cancelar</button>
-                    <button type="submit" id="btn-guardar-joven" class="w-1/2 bg-gradient-to-r from-rose-800 to-rose-950 text-white py-3 rounded-xl font-bold shadow-lg transform transition hover:scale-105">Guardar</button>
+                <div class="flex space-x-3 pt-3">
+                    <button type="button" onclick="cerrarModal('modal-joven')" class="w-1/2 bg-slate-100 hover:bg-slate-200 py-3.5 rounded-2xl font-bold text-slate-600 transition">Cancelar</button>
+                    <button type="submit" id="btn-guardar-joven" class="w-1/2 bg-guindo hover:bg-[#44121b] text-white py-3.5 rounded-2xl font-bold shadow-md transition">Guardar</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- MODAL EDITAR COBRO -->
-    <div id="modal-editar-cobro" class="fixed inset-0 bg-slate-950/70 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
-        <div class="bg-white rounded-3xl p-6 max-w-sm w-full shadow-2xl space-y-4">
-            <div class="flex justify-between items-center mb-2">
-                <h3 class="text-base font-black text-slate-900"><i class="fa-solid fa-pen-to-square text-indigo-600 mr-1"></i> Editar Pagos</h3>
-                <button onclick="cerrarModal('modal-editar-cobro')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
-            </div>
-            <p class="text-xs text-slate-500">Ajusta el total pagado por <span id="nombre-editar-cobro" class="font-bold text-slate-800"></span>. Esto reiniciará el historial a un solo abono con el monto total.</p>
-            <form id="form-editar-cobro" onsubmit="guardarEdicionCobro(event)" class="space-y-4">
-                <input type="hidden" id="edit-cobro-nombre">
-                <input type="hidden" id="edit-cobro-grupo">
-                <div>
-                    <label class="block font-bold text-slate-700 mb-1 text-xs">Total Pagado (Bs)</label>
-                    <input type="number" id="edit-cobro-monto" required min="0" step="1" class="w-full p-3 rounded-xl border bg-slate-50 outline-none font-black text-emerald-600 text-lg">
-                </div>
-                <div class="flex space-x-2 pt-2">
-                    <button type="button" onclick="cerrarModal('modal-editar-cobro')" class="w-1/2 bg-slate-100 text-slate-700 py-3 rounded-xl font-bold shadow-sm hover:bg-slate-200 transition">Cancelar</button>
-                    <button type="submit" class="w-1/2 bg-gradient-to-r from-indigo-600 to-indigo-800 hover:from-indigo-700 hover:to-indigo-900 text-white py-3 rounded-xl font-bold shadow-lg transform transition hover:scale-105">Guardar</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
+    <!-- MODAL ABONO / PAGO INICIAL CON MÉTODO Y FECHA -->
     <div id="modal-abono" class="fixed inset-0 bg-slate-950/70 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
-        <div class="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl space-y-3 text-xs">
-            <h3 class="text-base font-bold text-slate-900">Registrar Abono</h3>
-            <form onsubmit="guardarAbono(event)" class="space-y-3">
-                <div><label class="block font-bold text-slate-700 mb-1">Joven</label><select id="abono-joven" class="w-full p-3 rounded-xl border outline-none font-medium"></select></div>
-                <div><label class="block font-bold text-slate-700 mb-1">Monto (Bs)</label><input type="number" id="abono-monto" required class="w-full p-3 rounded-xl border outline-none font-bold text-emerald-600 text-sm" placeholder="30"></div>
-                <div><label class="block font-bold text-slate-700 mb-1">Recibe</label><input type="text" id="abono-recibe" required class="capitalized-text w-full p-3 rounded-xl border outline-none" placeholder="Nombre titular"></div>
-                <div class="flex space-x-2 pt-2">
-                    <button type="button" onclick="cerrarModal('modal-abono')" class="w-1/2 bg-slate-100 py-3 rounded-xl font-bold">Cancelar</button>
-                    <button type="submit" class="w-1/2 bg-gradient-to-r from-emerald-500 to-emerald-700 text-white py-3 rounded-xl font-bold shadow-lg transform transition hover:scale-105">Actualizar</button>
+        <div class="bg-white rounded-[2rem] p-6 sm:p-8 max-w-md w-full shadow-2xl space-y-4 text-sm">
+            <h3 class="text-lg font-black text-slate-900">Registrar Abono o Pago</h3>
+            <form onsubmit="guardarAbono(event)" class="space-y-4">
+                <div><label class="block font-bold text-slate-700 mb-1.5 text-xs uppercase">Joven</label><select id="abono-joven" class="w-full p-3.5 rounded-2xl border outline-none font-medium shadow-inner"></select></div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div><label class="block font-bold text-slate-700 mb-1.5 text-xs uppercase">Monto (Bs)</label><input type="number" id="abono-monto" step="0.01" required class="w-full p-3.5 rounded-2xl border outline-none font-bold text-emerald-600 text-sm shadow-inner" placeholder="30 u 80"></div>
+                    <div><label class="block font-bold text-slate-700 mb-1.5 text-xs uppercase">Fecha de Pago</label><input type="date" id="abono-fecha" required class="w-full p-3.5 rounded-2xl border outline-none font-bold text-slate-700 text-xs shadow-inner"></div>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-bold text-slate-700 mb-1.5 text-xs uppercase">Método</label>
+                        <select id="abono-metodo" class="w-full p-3.5 rounded-2xl border outline-none font-bold text-xs bg-white shadow-inner">
+                            <option value="Efectivo">Efectivo</option>
+                            <option value="QR">QR</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block font-bold text-slate-700 mb-1.5 text-xs uppercase">Recibe</label>
+                        <input type="text" id="abono-recibe" required class="capitalized-text w-full p-3.5 rounded-2xl border outline-none shadow-inner text-xs" placeholder="Nombre titular">
+                    </div>
+                </div>
+                <div class="flex space-x-3 pt-3">
+                    <button type="button" onclick="cerrarModal('modal-abono')" class="w-1/2 bg-slate-100 hover:bg-slate-200 py-3.5 rounded-2xl font-bold text-slate-600 transition">Cancelar</button>
+                    <button type="submit" class="w-1/2 bg-emerald-600 hover:bg-emerald-700 text-white py-3.5 rounded-2xl font-bold shadow-md transition">Registrar Pago</button>
                 </div>
             </form>
         </div>
     </div>
 
+    <!-- MODAL EDITAR Y GESTIONAR PAGO -->
+    <div id="modal-editar-pago" class="fixed inset-0 bg-slate-950/70 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-[2rem] p-6 sm:p-8 max-w-md w-full shadow-2xl space-y-4 text-sm">
+            <h3 class="text-lg font-black text-slate-900">Editar y Gestionar Pago</h3>
+            <form onsubmit="completarPagoJoven(event)" class="space-y-4">
+                <input type="hidden" id="edit-pago-grupo">
+                <input type="hidden" id="edit-pago-nombre-joven">
+                
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1.5 text-xs uppercase">Participante</label>
+                    <input type="text" id="edit-pago-nombre" disabled class="w-full p-3.5 rounded-2xl border bg-slate-100 font-bold text-slate-600 shadow-inner">
+                </div>
+                
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-bold text-slate-700 mb-1.5 text-xs uppercase">Total Pagado (Bs)</label>
+                        <input type="text" id="edit-pago-actual" disabled class="w-full p-3.5 rounded-2xl border bg-slate-50 font-black text-emerald-600 text-sm shadow-inner">
+                    </div>
+                    <div>
+                        <label class="block font-bold text-slate-700 mb-1.5 text-xs uppercase">Debe / Saldo</label>
+                        <input type="text" id="edit-pago-debe" disabled class="w-full p-3.5 rounded-2xl border bg-slate-50 font-black text-amber-600 text-sm shadow-inner">
+                    </div>
+                </div>
+
+                <!-- SECCIÓN DINÁMICA: SÓLO APARECE SI AÚN DEBE DINERO PARA COMPLETAR -->
+                <div id="seccion-completar-pago" class="bg-emerald-50/80 p-5 rounded-2xl border border-emerald-200 space-y-3 shadow-sm hidden">
+                    <label class="block font-bold text-emerald-900 text-xs uppercase"><i class="fa-solid fa-circle-plus mr-1"></i> Completar Saldo Restante</label>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-[11px] font-bold text-emerald-800 mb-1">Monto (Bs)</label>
+                            <input type="number" step="0.01" id="completa-monto" class="w-full p-3 rounded-xl border bg-white font-bold text-emerald-700 outline-none text-xs shadow-inner" placeholder="Ej: 40">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-bold text-emerald-800 mb-1">Fecha</label>
+                            <input type="date" id="completa-fecha" class="w-full p-3 rounded-xl border bg-white font-bold text-slate-700 outline-none text-xs shadow-inner">
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-[11px] font-bold text-emerald-800 mb-1">Método</label>
+                            <select id="completa-metodo" class="w-full p-3 rounded-xl border bg-white font-bold text-xs shadow-inner">
+                                <option value="Efectivo">Efectivo</option>
+                                <option value="QR">QR</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-bold text-emerald-800 mb-1">Recibe / Titular</label>
+                            <input type="text" id="completa-recibe" class="capitalized-text w-full p-3 rounded-xl border bg-white outline-none text-xs shadow-inner" placeholder="Nombre">
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1.5 text-xs uppercase">Historial de Abonos (Editable)</label>
+                    <textarea id="edit-pago-historial" rows="3" class="w-full p-3.5 rounded-2xl border text-slate-700 font-medium text-xs shadow-inner outline-none" placeholder="Historial..."></textarea>
+                </div>
+
+                <div class="flex space-x-3 pt-2">
+                    <button type="button" onclick="cerrarModal('modal-editar-pago')" class="w-1/2 bg-slate-100 hover:bg-slate-200 py-3.5 rounded-2xl font-bold text-slate-600 transition">Cancelar</button>
+                    <button type="submit" class="w-1/2 bg-emerald-600 hover:bg-emerald-700 text-white py-3.5 rounded-2xl font-bold shadow-md transition">Guardar Cambios</button>
+                </div>
+            </form>
+            
+            <!-- BOTÓN PARA ELIMINAR REGISTRO DE PAGO O CORREGIR ERROR -->
+            <div class="pt-2 border-t border-slate-100">
+                <button type="button" onclick="eliminarRegistroPago()" class="w-full bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold py-3 rounded-2xl text-xs transition flex items-center justify-center gap-1.5">
+                    <i class="fa-solid fa-trash-can"></i> Eliminar Registro / Poner en Cero
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- OTROS MODALES -->
     <div id="modal-comision" class="fixed inset-0 bg-slate-950/70 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
-        <div class="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl space-y-3 text-xs">
-            <h3 class="text-base font-bold text-slate-900">Nueva Comisión</h3>
-            <form onsubmit="guardarComision(event)" class="space-y-3">
-                <div><label class="block font-bold text-slate-700 mb-1">Nombre</label><input type="text" id="com-nombre" required class="capitalized-text w-full p-3 rounded-xl border outline-none" placeholder="Cocina"></div>
-                <div><label class="block font-bold text-slate-700 mb-1">Encargados (separados por coma)</label><input type="text" id="com-encargados" required class="capitalized-text w-full p-3 rounded-xl border outline-none" placeholder="María, Juan"></div>
-                <div class="flex space-x-2 pt-2">
-                    <button type="button" onclick="cerrarModal('modal-comision')" class="w-1/2 bg-slate-100 py-3 rounded-xl font-bold">Cancelar</button>
-                    <button type="submit" class="w-1/2 bg-amber-600 text-white py-3 rounded-xl font-bold shadow">Crear</button>
+        <div class="bg-white rounded-[2rem] p-6 sm:p-8 max-w-md w-full shadow-2xl space-y-4 text-sm">
+            <h3 class="text-lg font-black text-slate-900">Nueva Comisión</h3>
+            <form onsubmit="guardarComision(event)" class="space-y-4">
+                <div><label class="block font-bold text-slate-700 mb-1.5 text-xs uppercase">Nombre</label><input type="text" id="com-nombre" required class="capitalized-text w-full p-3.5 rounded-2xl border outline-none shadow-inner" placeholder="Cocina"></div>
+                <div><label class="block font-bold text-slate-700 mb-1.5 text-xs uppercase">Encargados (separados por coma)</label><input type="text" id="com-encargados" required class="capitalized-text w-full p-3.5 rounded-2xl border outline-none shadow-inner" placeholder="María, Juan"></div>
+                <div class="flex space-x-3 pt-3">
+                    <button type="button" onclick="cerrarModal('modal-comision')" class="w-1/2 bg-slate-100 hover:bg-slate-200 py-3.5 rounded-2xl font-bold text-slate-600 transition">Cancelar</button>
+                    <button type="submit" class="w-1/2 bg-amber-600 hover:bg-amber-700 text-white py-3.5 rounded-2xl font-bold shadow-md transition">Crear</button>
                 </div>
             </form>
         </div>
     </div>
 
     <div id="modal-expositor" class="fixed inset-0 bg-slate-950/70 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
-        <div class="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl space-y-3 text-xs">
-            <h3 id="titulo-modal-expositor" class="text-base font-bold text-slate-900">Agregar Expositor</h3>
-            <form onsubmit="guardarExpositor(event)" class="space-y-3">
+        <div class="bg-white rounded-[2rem] p-6 sm:p-8 max-w-md w-full shadow-2xl space-y-4 text-sm">
+            <h3 id="titulo-modal-expositor" class="text-lg font-black text-slate-900">Agregar Expositor</h3>
+            <form onsubmit="guardarExpositor(event)" class="space-y-4">
                 <input type="hidden" id="exp-index" value="-1">
-                <div><label class="block font-bold text-slate-700 mb-1">Nombre Completo</label><input type="text" id="exp-nombre" required class="capitalized-text w-full p-3 rounded-xl border outline-none font-medium" placeholder="Padre Juan"></div>
-                <div><label class="block font-bold text-slate-700 mb-1">Tema</label><input type="text" id="exp-tema" required class="capitalized-text w-full p-3 rounded-xl border outline-none" placeholder="Eucaristía"></div>
-                <div><label class="block font-bold text-slate-700 mb-1">Foto</label><input type="file" id="exp-file" accept="image/*" class="w-full p-2 rounded-xl border bg-slate-50 text-xs"></div>
-                <div class="flex space-x-2 pt-2">
-                    <button type="button" onclick="cerrarModal('modal-expositor')" class="w-1/2 bg-slate-100 py-3 rounded-xl font-bold">Cancelar</button>
-                    <button type="submit" class="w-1/2 bg-guindo text-white py-3 rounded-xl font-bold shadow">Guardar</button>
+                <div><label class="block font-bold text-slate-700 mb-1.5 text-xs uppercase">Nombre Completo</label><input type="text" id="exp-nombre" required class="capitalized-text w-full p-3.5 rounded-2xl border outline-none font-medium shadow-inner" placeholder="Padre Juan"></div>
+                <div><label class="block font-bold text-slate-700 mb-1.5 text-xs uppercase">Tema</label><input type="text" id="exp-tema" required class="capitalized-text w-full p-3.5 rounded-2xl border outline-none shadow-inner" placeholder="Eucaristía"></div>
+                <div><label class="block font-bold text-slate-700 mb-1.5 text-xs uppercase">Foto</label><input type="file" id="exp-file" accept="image/*" class="w-full p-3 rounded-2xl border bg-slate-50 text-xs shadow-inner"></div>
+                <div class="flex space-x-3 pt-3">
+                    <button type="button" onclick="cerrarModal('modal-expositor')" class="w-1/2 bg-slate-100 hover:bg-slate-200 py-3.5 rounded-2xl font-bold text-slate-600 transition">Cancelar</button>
+                    <button type="submit" class="w-1/2 bg-guindo text-white py-3.5 rounded-2xl font-bold shadow-md transition">Guardar</button>
                 </div>
             </form>
         </div>
     </div>
 
     <div id="modal-gasto" class="fixed inset-0 bg-slate-950/70 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
-        <div class="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl space-y-3 text-xs">
-            <h3 class="text-base font-bold text-slate-900">Registrar Gasto</h3>
-            <form onsubmit="guardarGasto(event)" class="space-y-3">
-                <div><label class="block font-bold text-slate-700 mb-1">Categoría</label><select id="gas-cat" class="w-full p-3 rounded-xl border outline-none font-bold"><option value="Transporte">Transporte</option><option value="Alimentación">Alimentación</option><option value="Hospedaje">Hospedaje</option><option value="Otros">Otros</option></select></div>
-                <div><label class="block font-bold text-slate-700 mb-1">Descripción</label><input type="text" id="gas-desc" required class="capitalized-text w-full p-3 rounded-xl border outline-none" placeholder="Compra de víveres"></div>
-                <div><label class="block font-bold text-slate-700 mb-1">Monto (Bs)</label><input type="number" id="gas-monto" required class="w-full p-3 rounded-xl border outline-none font-bold text-rose-600 text-sm" placeholder="500"></div>
-                <div class="flex space-x-2 pt-2">
-                    <button type="button" onclick="cerrarModal('modal-gasto')" class="w-1/2 bg-slate-100 py-3 rounded-xl font-bold">Cancelar</button>
-                    <button type="submit" class="w-1/2 bg-amber-600 text-white py-3 rounded-xl font-bold shadow">Guardar</button>
+        <div class="bg-white rounded-[2rem] p-6 sm:p-8 max-w-md w-full shadow-2xl space-y-4 text-sm">
+            <h3 class="text-lg font-black text-slate-900">Registrar Gasto</h3>
+            <form onsubmit="guardarGasto(event)" class="space-y-4">
+                <div><label class="block font-bold text-slate-700 mb-1.5 text-xs uppercase">Categoría</label><select id="gas-cat" class="w-full p-3.5 rounded-2xl border outline-none font-bold shadow-inner"><option value="Transporte">Transporte</option><option value="Alimentación">Alimentación</option><option value="Hospedaje">Hospedaje</option><option value="Otros">Otros</option></select></div>
+                <div><label class="block font-bold text-slate-700 mb-1.5 text-xs uppercase">Descripción</label><input type="text" id="gas-desc" required class="capitalized-text w-full p-3.5 rounded-2xl border outline-none shadow-inner" placeholder="Compra de víveres"></div>
+                <div><label class="block font-bold text-slate-700 mb-1.5 text-xs uppercase">Monto (Bs)</label><input type="number" id="gas-monto" required class="w-full p-3.5 rounded-2xl border outline-none font-bold text-rose-600 text-sm shadow-inner" placeholder="500"></div>
+                <div class="flex space-x-3 pt-3">
+                    <button type="button" onclick="cerrarModal('modal-gasto')" class="w-1/2 bg-slate-100 hover:bg-slate-200 py-3.5 rounded-2xl font-bold text-slate-600 transition">Cancelar</button>
+                    <button type="submit" class="w-1/2 bg-amber-600 hover:bg-amber-700 text-white py-3.5 rounded-2xl font-bold shadow-md transition">Guardar</button>
                 </div>
             </form>
         </div>
     </div>
 
     <div id="modal-actividad" class="fixed inset-0 bg-slate-950/70 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
-        <div class="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl space-y-3 text-xs">
-            <h3 class="text-base font-bold text-slate-900">Programar Actividad</h3>
-            <form onsubmit="guardarActividad(event)" class="space-y-3">
-                <div class="grid grid-cols-2 gap-2">
-                    <div><label class="block font-bold text-slate-700 mb-1">Inicio</label><input type="time" id="act-hora-inicio" required class="w-full p-3 rounded-xl border outline-none font-bold"></div>
-                    <div><label class="block font-bold text-slate-700 mb-1">Fin</label><input type="time" id="act-hora-fin" required class="w-full p-3 rounded-xl border outline-none font-bold"></div>
+        <div class="bg-white rounded-[2rem] p-6 sm:p-8 max-w-md w-full shadow-2xl space-y-4 text-sm">
+            <h3 class="text-lg font-black text-slate-900">Programar Actividad</h3>
+            <form onsubmit="guardarActividad(event)" class="space-y-4">
+                <div class="grid grid-cols-2 gap-3">
+                    <div><label class="block font-bold text-slate-700 mb-1.5 text-xs uppercase">Inicio</label><input type="time" id="act-hora-inicio" required class="w-full p-3.5 rounded-2xl border outline-none font-bold shadow-inner"></div>
+                    <div><label class="block font-bold text-slate-700 mb-1.5 text-xs uppercase">Fin</label><input type="time" id="act-hora-fin" required class="w-full p-3.5 rounded-2xl border outline-none font-bold shadow-inner"></div>
                 </div>
-                <div><label class="block font-bold text-slate-700 mb-1">Título</label><input type="text" id="act-titulo" required class="capitalized-text w-full p-3 rounded-xl border outline-none" placeholder="Oración"></div>
-                <div><label class="block font-bold text-slate-700 mb-1">Responsable</label><input type="text" id="act-resp" required class="capitalized-text w-full p-3 rounded-xl border outline-none" placeholder="Padre Juan"></div>
-                <div class="flex space-x-2 pt-2">
-                    <button type="button" onclick="cerrarModal('modal-actividad')" class="w-1/2 bg-slate-100 py-3 rounded-xl font-bold">Cancelar</button>
-                    <button type="submit" class="w-1/2 bg-guindo text-white py-3 rounded-xl font-bold shadow">Programar</button>
+                <div><label class="block font-bold text-slate-700 mb-1.5 text-xs uppercase">Título</label><input type="text" id="act-titulo" required class="capitalized-text w-full p-3.5 rounded-2xl border outline-none shadow-inner" placeholder="Oración"></div>
+                <div><label class="block font-bold text-slate-700 mb-1.5 text-xs uppercase">Responsable</label><input type="text" id="act-resp" required class="capitalized-text w-full p-3.5 rounded-2xl border outline-none shadow-inner" placeholder="Padre Juan"></div>
+                <div class="flex space-x-3 pt-3">
+                    <button type="button" onclick="cerrarModal('modal-actividad')" class="w-1/2 bg-slate-100 hover:bg-slate-200 py-3.5 rounded-2xl font-bold text-slate-600 transition">Cancelar</button>
+                    <button type="submit" class="w-1/2 bg-guindo text-white py-3.5 rounded-2xl font-bold shadow-md transition">Programar</button>
                 </div>
             </form>
         </div>
     </div>
 
     <div id="modal-precio" class="fixed inset-0 bg-slate-950/70 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
-        <div class="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl space-y-3 text-xs">
-            <h3 class="text-base font-bold text-slate-900">Costo Base por Joven</h3>
-            <form onsubmit="actualizarPrecioBase(event)" class="space-y-3">
-                <div><label class="block font-bold text-slate-700 mb-1">Monto (Bs)</label><input type="number" id="nuevo-precio" required class="w-full p-3 rounded-xl border outline-none font-bold text-lg text-guindo" placeholder="80"></div>
-                <div class="flex space-x-2 pt-2">
-                    <button type="button" onclick="cerrarModal('modal-precio')" class="w-1/2 bg-slate-100 py-3 rounded-xl font-bold">Cancelar</button>
-                    <button type="submit" class="w-1/2 bg-guindo text-white py-3 rounded-xl font-bold shadow">Actualizar</button>
+        <div class="bg-white rounded-[2rem] p-6 sm:p-8 max-w-md w-full shadow-2xl space-y-4 text-sm">
+            <h3 class="text-lg font-black text-slate-900">Costo Base por Joven</h3>
+            <form onsubmit="actualizarPrecioBase(event)" class="space-y-4">
+                <div><label class="block font-bold text-slate-700 mb-1.5 text-xs uppercase">Monto (Bs)</label><input type="number" id="nuevo-precio" required class="w-full p-3.5 rounded-2xl border outline-none font-bold text-xl text-guindo shadow-inner" placeholder="80"></div>
+                <div class="flex space-x-3 pt-3">
+                    <button type="button" onclick="cerrarModal('modal-precio')" class="w-1/2 bg-slate-100 hover:bg-slate-200 py-3.5 rounded-2xl font-bold text-slate-600 transition">Cancelar</button>
+                    <button type="submit" class="w-1/2 bg-guindo hover:bg-[#44121b] text-white py-3.5 rounded-2xl font-bold shadow-md transition">Actualizar</button>
                 </div>
             </form>
         </div>
     </div>
 
+    <!-- MODAL ALERTAS MÉDICAS GLOBALES -->
     <div id="modal-medicos" class="fixed inset-0 bg-slate-950/70 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
-        <div class="bg-white rounded-3xl p-6 max-w-md w-full shadow-2xl space-y-4 max-h-[90vh] flex flex-col text-xs">
+        <div class="bg-white rounded-[2rem] p-6 sm:p-8 max-w-lg w-full shadow-2xl space-y-5 max-h-[90vh] flex flex-col text-sm">
             <div class="flex justify-between items-center">
-                <h3 class="text-base font-bold text-slate-900"><i class="fa-solid fa-notes-medical text-rose-600"></i> Alertas y Medicamentos</h3>
-                <button onclick="cerrarModal('modal-medicos')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+                <h3 class="text-lg font-black text-slate-900 flex items-center gap-2"><i class="fa-solid fa-notes-medical text-rose-600 text-xl"></i> Alertas y Medicamentos</h3>
+                <button onclick="cerrarModal('modal-medicos')" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-xl"></i></button>
             </div>
-            <div class="overflow-y-auto flex-grow space-y-2" id="lista-medicos-content">
-            </div>
-            <button onclick="descargarReporteMedico()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-3 rounded-xl shadow-sm border mt-2 transition"><i class="fa-solid fa-download"></i> Descargar Lista (.txt)</button>
+            <div class="overflow-y-auto flex-grow space-y-3" id="lista-medicos-content"></div>
+            <button onclick="descargarReporteMedico()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-3.5 rounded-2xl shadow-sm border transition flex items-center justify-center gap-2"><i class="fa-solid fa-download"></i> Descargar Lista Completa (.txt)</button>
         </div>
     </div>
+
     <!-- SCRIPT FIREBASE Y LÓGICA -->
     <script>
         const firebaseConfig = {
@@ -457,23 +567,49 @@
         }
 
         async function guardarDatos() {
+            localStorage.setItem("retiro_datos", JSON.stringify(baseDatos));
+            
             if (esFirebaseConfigurado()) {
                 try {
-                    db.collection("retiro_datos").doc("principal").set(baseDatos).catch(e => {
-                        console.error("Error Firebase:", e);
-                        localStorage.setItem("retiro_datos", JSON.stringify(baseDatos));
-                    });
-                    localStorage.setItem("retiro_datos", JSON.stringify(baseDatos));
-                    renderizarTodo();
-                } catch (e) {
-                    console.error("Error Firebase:", e);
-                    localStorage.setItem("retiro_datos", JSON.stringify(baseDatos));
-                    renderizarTodo();
+                    let datosLimpios = JSON.parse(JSON.stringify(baseDatos));
+                    await db.collection("retiro_datos").doc("principal").set(datosLimpios);
+                } catch(e) {
+                    console.error("Error crítico al guardar en Firebase:", e);
                 }
-            } else {
-                localStorage.setItem("retiro_datos", JSON.stringify(baseDatos));
-                renderizarTodo();
             }
+            renderizarTodo();
+        }
+
+        function exportarBackup() {
+            let dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(baseDatos, null, 2));
+            let downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", "Respaldo_Retiro_2026.json");
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+            alert("✨ Copia de respaldo descargada con éxito.");
+        }
+
+        function importarBackup(event) {
+            let file = event.target.files[0];
+            if (!file) return;
+            let reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    let datosCargados = JSON.parse(e.target.result);
+                    if (datosCargados && datosCargados.grupos) {
+                        baseDatos = datosCargados;
+                        guardarDatos();
+                        alert("✨ ¡Datos restaurados con éxito!");
+                    } else {
+                        alert("El archivo no tiene el formato correcto.");
+                    }
+                } catch (err) {
+                    alert("Error al leer el archivo de respaldo.");
+                }
+            };
+            reader.readAsText(file);
         }
 
         function togglePassword() {
@@ -493,17 +629,8 @@
             if(rol === 'admin') {
                 abrirModal('modal-login');
             } else {
-                document.getElementById('btn-editar-precio').classList.add('hidden');
-                document.getElementById('contenedor-selector-grupo').style.display = 'flex';
-                document.getElementById('btn-nueva-comision').classList.add('hidden');
-                document.getElementById('btn-nuevo-expositor').classList.add('hidden');
-                document.getElementById('btn-nueva-actividad').classList.add('hidden');
-                document.getElementById('controles-gastos-admin').classList.add('hidden');
-                document.getElementById('panel-avisos-masivos').classList.add('hidden');
-                document.getElementById('btn-gastos').classList.add('hidden'); // OCULTA GASTOS AL CATEQUISTA
-                if (!document.getElementById('tab-gastos').classList.contains('hidden')) {
-                    switchTab('salud');
-                }
+                localStorage.setItem('retiro_rol', 'catequista');
+                aplicarPermisosRol('catequista');
                 renderizarTodo();
             }
         }
@@ -514,40 +641,75 @@
             if(pass === "confir2026") {
                 cerrarModal('modal-login');
                 document.getElementById('input-pass-admin').value = '';
+                abrirModal('modal-bienvenida');
+            } else {
+                alert('Contraseña incorrecta.');
+            }
+        }
+
+        function cerrarBienvenida() {
+            cerrarModal('modal-bienvenida');
+            localStorage.setItem('retiro_rol', 'admin');
+            aplicarPermisosRol('admin');
+            renderizarTodo();
+        }
+
+        function aplicarPermisosRol(rol) {
+            document.getElementById('select-rol').value = rol;
+            let tabGastosBtn = document.getElementById('btn-gastos');
+
+            if(rol === 'admin') {
                 document.getElementById('btn-editar-precio').classList.remove('hidden');
                 document.getElementById('contenedor-selector-grupo').style.display = 'none';
                 document.getElementById('btn-nueva-comision').classList.remove('hidden');
                 document.getElementById('btn-nuevo-expositor').classList.remove('hidden');
                 document.getElementById('btn-nueva-actividad').classList.remove('hidden');
-                document.getElementById('controles-gastos-admin').classList.remove('hidden');
                 document.getElementById('panel-avisos-masivos').classList.remove('hidden');
-                document.getElementById('btn-gastos').classList.remove('hidden'); // MUESTRA GASTOS AL ADMIN
-                renderizarTodo();
-                mostrarToast('Modo Administrador activado', 'exito');
+                tabGastosBtn.classList.remove('hidden'); 
             } else {
-                mostrarToast('Contraseña incorrecta', 'error');
+                document.getElementById('btn-editar-precio').classList.add('hidden');
+                document.getElementById('contenedor-selector-grupo').style.display = 'flex';
+                document.getElementById('btn-nueva-comision').classList.add('hidden');
+                document.getElementById('btn-nuevo-expositor').classList.add('hidden');
+                document.getElementById('btn-nueva-actividad').classList.add('hidden');
+                document.getElementById('panel-avisos-masivos').classList.add('hidden');
+                tabGastosBtn.classList.add('hidden'); 
+
+                let tabGastosContent = document.getElementById('tab-gastos');
+                if(!tabGastosContent.classList.contains('hidden')) {
+                    switchTab('salud');
+                }
             }
         }
 
         function cancelarLogin() {
             cerrarModal('modal-login');
-            document.getElementById('select-rol').value = "catequista";
-            cambiarRolSistema();
+            localStorage.setItem('retiro_rol', 'catequista');
+            aplicarPermisosRol('catequista');
+            renderizarTodo();
         }
 
         function switchTab(tabId) {
+            let rol = document.getElementById('select-rol').value;
+            if(tabId === 'gastos' && rol !== 'admin') return; 
+
             document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
             document.querySelectorAll('.tab-btn').forEach(el => {
-                el.classList.remove('bg-white', 'text-[#581823]', 'shadow-lg', 'transform', 'scale-105');
-                el.classList.add('text-rose-100', 'hover:bg-white/20', 'hover:-translate-y-0.5');
+                el.classList.remove('bg-white', 'text-[#581823]', 'shadow-xl');
+                el.classList.add('text-rose-100', 'hover:bg-white/10');
             });
             document.getElementById('tab-' + tabId).classList.remove('hidden');
             let btn = document.getElementById('btn-' + tabId);
-            btn.classList.add('bg-white', 'text-[#581823]', 'shadow-lg', 'transform', 'scale-105');
-            btn.classList.remove('text-rose-100', 'hover:bg-white/20', 'hover:-translate-y-0.5');
+            btn.classList.add('bg-white', 'text-[#581823]', 'shadow-xl');
+            btn.classList.remove('text-rose-100', 'hover:bg-white/10');
         }
 
-        function abrirModal(id) { document.getElementById(id).classList.remove('hidden'); }
+        function abrirModal(id) { 
+            if(id === 'modal-abono') {
+                document.getElementById('abono-fecha').valueAsDate = new Date();
+            }
+            document.getElementById(id).classList.remove('hidden'); 
+        }
         function cerrarModal(id) { document.getElementById(id).classList.add('hidden'); }
 
         function generarRelojHorasMed() {
@@ -555,9 +717,10 @@
             let cont = document.getElementById('reloj-horas-med');
             cont.innerHTML = '';
             for(let i=1; i<=n; i++) {
-                cont.innerHTML += `<div class="flex items-center space-x-2"><span class="text-slate-500 w-14 text-xs font-bold">Toma ${i}:</span><input type="time" required class="input-hora-med w-full p-2 rounded-xl border bg-white text-xs font-bold"></div>`;
+                cont.innerHTML += `<div class="flex items-center space-x-2"><span class="text-slate-600 w-16 text-xs font-bold">Toma ${i}:</span><input type="time" required class="input-hora-med w-full p-2.5 rounded-xl border bg-white text-xs font-bold shadow-inner"></div>`;
             }
         }
+
         function guardarJoven(e) {
             e.preventDefault();
             let grupoNum = document.getElementById('select-grupo').value;
@@ -569,66 +732,135 @@
             let horas = [];
             document.querySelectorAll('.input-hora-med').forEach(i => { if(i.value) horas.push(i.value); });
 
-            if(!baseDatos.grupos) baseDatos.grupos = {}; if(!baseDatos.grupos[grupoNum]) baseDatos.grupos[grupoNum] = { jovenes: [] }; if(!baseDatos.grupos[grupoNum].jovenes) baseDatos.grupos[grupoNum].jovenes = [];
+            if(!baseDatos.grupos) baseDatos.grupos = {}; 
+            if(!baseDatos.grupos[grupoNum]) baseDatos.grupos[grupoNum] = { jovenes: [] }; 
+            if(!baseDatos.grupos[grupoNum].jovenes) baseDatos.grupos[grupoNum].jovenes = [];
+            
             baseDatos.grupos[grupoNum].jovenes.push({ nombre, alergia, med, horas, contacto, celular, pagado: 0, historial: [] });
 
             guardarDatos().then(() => {
                 cerrarModal('modal-joven');
                 document.getElementById('form-joven-reg').reset();
                 document.getElementById('reloj-horas-med').innerHTML = '';
-                mostrarToast('Joven registrado con éxito');
-            }).catch(err => mostrarToast("Error al guardar: " + err.message, "error"));
-        }
-
-        function editarCobroJoven(nombre, grupo, pagadoActual) {
-            document.getElementById('edit-cobro-nombre').value = nombre;
-            document.getElementById('edit-cobro-grupo').value = grupo;
-            document.getElementById('nombre-editar-cobro').innerText = nombre;
-            document.getElementById('edit-cobro-monto').value = pagadoActual;
-            abrirModal('modal-editar-cobro');
-        }
-
-        function guardarEdicionCobro(e) {
-            e.preventDefault();
-            let nombre = document.getElementById('edit-cobro-nombre').value;
-            let grupo = document.getElementById('edit-cobro-grupo').value;
-            let nuevoMonto = parseFloat(document.getElementById('edit-cobro-monto').value) || 0;
-
-            if (baseDatos.grupos[grupo] && baseDatos.grupos[grupo].jovenes) {
-                let j = baseDatos.grupos[grupo].jovenes.find(x => x.nombre === nombre);
-                if (j) {
-                    j.pagado = nuevoMonto;
-                    let f = new Date();
-                    j.historial = [{ monto: nuevoMonto, fecha: f.getHours() + ':' + (f.getMinutes()<10?'0':'') + f.getMinutes() }];
-                    if (nuevoMonto === 0) j.historial = [];
-                    guardarDatos().then(() => {
-                        cerrarModal('modal-editar-cobro');
-                        mostrarToast('Cobro actualizado correctamente', 'exito');
-                    });
-                }
-            }
+                alert('✨ ¡Creación exitosa! Joven registrado correctamente.');
+            }).catch(err => alert("Error al guardar: " + err.message));
         }
 
         function guardarAbono(e) {
             e.preventDefault();
-            let grupoNum = document.getElementById('select-grupo').value;
-            let nombre = document.getElementById('abono-joven').value;
+            let datosSelect = document.getElementById('abono-joven').value; 
+            if(!datosSelect) { alert("Seleccione un joven."); return; }
+            let partes = datosSelect.split('|');
+            let grupoNum = partes[0];
+            let nombreJoven = partes[1];
             let monto = parseFloat(document.getElementById('abono-monto').value);
+            let fecha = document.getElementById('abono-fecha').value || new Date().toISOString().split('T')[0];
+            let metodo = document.getElementById('abono-metodo').value;
             let recibe = document.getElementById('abono-recibe').value;
 
             let g = baseDatos.grupos[grupoNum];
-            if(g) {
-                let j = g.jovenes.find(x => x.nombre === nombre);
+            if(g && g.jovenes) {
+                let j = g.jovenes.find(x => x.nombre.trim().toLowerCase() === nombreJoven.trim().toLowerCase());
                 if(j) {
+                    if(!j.pagado) j.pagado = 0;
                     j.pagado += monto;
-                    j.historial.push({ monto: monto, fecha: new Date().getHours() + ':' + (new Date().getMinutes()<10?'0':'') + new Date().getMinutes() });
+                    if(!j.historial) j.historial = [];
+                    j.historial.push(`${monto.toFixed(2)} Bs [${fecha}] (${metodo}) - Recibió: ${recibe}`);
                 }
             }
 
             guardarDatos().then(() => {
                 cerrarModal('modal-abono');
-                mostrarToast('Abono guardado correctamente');
+                document.getElementById('abono-monto').value = '';
+                document.getElementById('abono-recibe').value = '';
+                alert('✨ ¡Pago / Abono registrado con éxito!');
             });
+        }
+
+        function prepararEditarPago(grupoNum, indexJoven) {
+            let g = baseDatos.grupos[grupoNum];
+            if(!g || !g.jovenes || !g.jovenes[indexJoven]) {
+                alert("Error al ubicar al participante.");
+                return;
+            }
+            let j = g.jovenes[indexJoven];
+            document.getElementById('edit-pago-grupo').value = grupoNum;
+            document.getElementById('edit-pago-nombre-joven').value = j.nombre;
+            document.getElementById('edit-pago-nombre').value = j.nombre + " (Grupo " + grupoNum + ")";
+            
+            let pagadoActual = j.pagado || 0;
+            let debeActual = Math.max(0, costoBase - pagadoActual);
+
+            document.getElementById('edit-pago-actual').value = pagadoActual.toFixed(2) + " Bs";
+            document.getElementById('edit-pago-debe').value = debeActual.toFixed(2) + " Bs";
+            
+            // SECCIÓN DINÁMICA: SÓLO APARECE SI AÚN DEBE DINERO PARA COMPLETAR
+            let seccionCompletar = document.getElementById('seccion-completar-pago');
+            if (debeActual > 0) {
+                seccionCompletar.classList.remove('hidden');
+                document.getElementById('completa-monto').value = debeActual;
+                document.getElementById('completa-fecha').valueAsDate = new Date();
+                document.getElementById('completa-recibe').value = '';
+            } else {
+                seccionCompletar.classList.add('hidden');
+            }
+
+            let historialTexto = (j.historial || []).join('\n');
+            document.getElementById('edit-pago-historial').value = historialTexto;
+
+            abrirModal('modal-editar-pago');
+        }
+
+        function completarPagoJoven(e) {
+            e.preventDefault();
+            let grupoNum = document.getElementById('edit-pago-grupo').value;
+            let nombreJoven = document.getElementById('edit-pago-nombre-joven').value;
+            let montoExtraInput = document.getElementById('completa-monto').value;
+            let fechaExtra = document.getElementById('completa-fecha').value || new Date().toISOString().split('T')[0];
+            let metodoExtra = document.getElementById('completa-metodo').value;
+            let recibeExtra = document.getElementById('completa-recibe').value;
+            let historialEditado = document.getElementById('edit-pago-historial').value;
+
+            let g = baseDatos.grupos[grupoNum];
+            if(g && g.jovenes) {
+                let j = g.jovenes.find(x => x.nombre.trim().toLowerCase() === nombreJoven.trim().toLowerCase());
+                if(j) {
+                    let seccionCompletar = document.getElementById('seccion-completar-pago');
+                    if (!seccionCompletar.classList.contains('hidden') && montoExtraInput && parseFloat(montoExtraInput) > 0) {
+                        let montoExtra = parseFloat(montoExtraInput);
+                        j.pagado = (j.pagado || 0) + montoExtra;
+                        if(!j.historial) j.historial = [];
+                        j.historial.push(`${montoExtra.toFixed(2)} Bs [${fechaExtra}] (${metodoExtra}) - Recibió: ${recibeExtra || 'Coordinación'}`);
+                    } else {
+                        j.historial = historialEditado.split('\n').filter(linea => linea.trim() !== '');
+                    }
+                }
+            }
+
+            guardarDatos().then(() => {
+                cerrarModal('modal-editar-pago');
+                alert('✨ ¡Pago actualizado correctamente!');
+            });
+        }
+
+        function eliminarRegistroPago() {
+            let grupoNum = document.getElementById('edit-pago-grupo').value;
+            let nombreJoven = document.getElementById('edit-pago-nombre-joven').value;
+
+            if(confirm('¿Estás seguro de poner en CERO y limpiar todo el historial de pago de este joven?')) {
+                let g = baseDatos.grupos[grupoNum];
+                if(g && g.jovenes) {
+                    let j = g.jovenes.find(x => x.nombre.trim().toLowerCase() === nombreJoven.trim().toLowerCase());
+                    if(j) {
+                        j.pagado = 0;
+                        j.historial = [];
+                    }
+                }
+                guardarDatos().then(() => {
+                    cerrarModal('modal-editar-pago');
+                    alert('✨ Registro de pago reiniciado correctamente.');
+                });
+            }
         }
 
         function guardarComision(e) {
@@ -640,7 +872,7 @@
 
             guardarDatos().then(() => {
                 cerrarModal('modal-comision');
-                mostrarToast('Comisión creada');
+                alert('✨ ¡Creación exitosa! Comisión creada.');
             });
         }
 
@@ -680,8 +912,8 @@
 
                 guardarDatos().then(() => {
                     cerrarModal('modal-expositor');
-                    mostrarToast('Expositor guardado');
-                }).catch(err => mostrarToast("Error: " + err.message, 'error'));
+                    alert('✨ ¡Creación exitosa! Expositor guardado.');
+                }).catch(err => alert("Error: " + err.message));
             };
 
             if(fileInput.files && fileInput.files[0]) {
@@ -703,7 +935,7 @@
 
             guardarDatos().then(() => {
                 cerrarModal('modal-gasto');
-                mostrarToast('Gasto registrado con éxito');
+                alert('✨ ¡Creación exitosa! Gasto registrado.');
             });
         }
 
@@ -718,7 +950,7 @@
 
             guardarDatos().then(() => {
                 cerrarModal('modal-actividad');
-                mostrarToast('Actividad programada');
+                alert('✨ ¡Creación exitosa! Actividad programada.');
             });
         }
 
@@ -728,7 +960,7 @@
             document.getElementById('label-costo-base').innerText = costoBase.toFixed(2) + " Bs";
             cerrarModal('modal-precio');
             renderizarTodo();
-            mostrarToast('Actualización exitosa');
+            alert('✨ ¡Actualización exitosa!');
         }
 
         function ponerCeroGastos() {
@@ -737,6 +969,7 @@
                 guardarDatos();
             }
         }
+
         function generarReporteFinanciero() {
             let totalRecaudado = 0;
             for(let g in baseDatos.grupos) {
@@ -781,23 +1014,23 @@
             for(let g in baseDatos.grupos) {
                 if(baseDatos.grupos[g].jovenes) {
                     baseDatos.grupos[g].jovenes.forEach(j => {
-                        let medString = String(j.med || '');
-                        let alergiaString = String(j.alergia || '');
-                        let horasArray = Array.isArray(j.horas) ? j.horas : (j.horas ? [j.horas] : []);
-
-                        let tomaMed = (medString.toLowerCase() !== 'ninguno' && medString.trim() !== '') || (horasArray.length > 0);
-                        let tieneAlergia = (alergiaString.toLowerCase() !== 'ninguna' && alergiaString.trim() !== '');
+                        let tomaMed = (j.med && j.med.toLowerCase() !== 'ninguno' && j.med.trim() !== '') || (j.horas && j.horas.length > 0);
+                        let tieneAlergia = (j.alergia && j.alergia.toLowerCase() !== 'ninguna' && j.alergia.trim() !== '');
 
                         if(tomaMed || tieneAlergia) {
                             hay = true;
+                            let medText = tomaMed ? `<span class="text-guindo font-bold">${j.med}</span> (Horarios: ${(j.horas||[]).join(', ')})` : '';
+                            let alerText = tieneAlergia ? `<span class="text-rose-600 font-bold">Alergia: ${j.alergia}</span>` : '';
                             cont.innerHTML += `
-                                <div class="bg-gradient-to-br from-rose-50 to-white p-4 rounded-2xl border-l-4 border-rose-500 shadow-sm relative">
-                                    <div class="absolute top-3 right-3 bg-rose-200 text-rose-800 font-bold px-2.5 py-1 rounded-lg text-[10px] shadow-sm">GRUPO ${g}</div>
-                                    <h4 class="font-black text-slate-800 text-[13px] mb-2 pr-16">${j.nombre}</h4>
-                                    <div class="space-y-2 text-xs">
-                                        ${tieneAlergia ? `<div class="flex items-start gap-2 bg-white p-2 rounded-lg border border-rose-100 shadow-sm"><div class="text-rose-500"><i class="fa-solid fa-triangle-exclamation"></i></div><div><span class="text-rose-700 font-bold">Alergia:</span> <span class="text-slate-700 font-bold">${alergiaString}</span></div></div>` : ''}
-                                        ${tomaMed ? `<div class="flex items-start gap-2 bg-white p-2 rounded-lg border border-indigo-100 shadow-sm"><div class="text-indigo-500"><i class="fa-solid fa-pills"></i></div><div><span class="text-indigo-700 font-bold">Medicación:</span> <span class="text-slate-700 font-bold">${medString}</span> <span class="text-slate-400 block mt-0.5"><i class="fa-regular fa-clock"></i> ${horasArray.join(', ')}</span></div></div>` : ''}
-                                        <div class="text-[10px] text-slate-500 mt-2 bg-slate-50 p-2 rounded-lg border border-slate-100"><i class="fa-solid fa-phone text-slate-400"></i> Tutor: <span class="font-bold text-slate-700">${j.contacto}</span> &middot; <a href="tel:${j.celular}" class="text-blue-600 font-bold underline">${j.celular}</a></div>
+                                <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 shadow-sm">
+                                    <div class="flex justify-between items-center">
+                                        <span class="font-black text-slate-900 text-base">${j.nombre}</span>
+                                        <span class="bg-rose-100 text-rose-800 px-3 py-1 rounded-full text-xs font-black">Grupo ${g}</span>
+                                    </div>
+                                    <div class="mt-2 space-y-1.5 text-xs">
+                                        ${tieneAlergia ? `<div><i class="fa-solid fa-triangle-exclamation text-rose-500 mr-1.5"></i> ${alerText}</div>` : ''}
+                                        ${tomaMed ? `<div><i class="fa-solid fa-pills text-guindo mr-1.5"></i> ${medText}</div>` : ''}
+                                        <div class="text-slate-500 mt-1 pt-1.5 border-t border-slate-200"><i class="fa-solid fa-phone mr-1.5"></i> Tutor: ${j.contacto} (${j.celular})</div>
                                     </div>
                                 </div>
                             `;
@@ -806,39 +1039,34 @@
                 }
             }
 
-            if(!hay) cont.innerHTML = '<p class="text-center text-slate-400 p-4">Nadie requiere medicación o tiene alergias registradas.</p>';
+            if(!hay) cont.innerHTML = '<p class="text-center text-slate-400 p-6">Nadie requiere medicación o tiene alergias registradas en ningún grupo.</p>';
             abrirModal('modal-medicos');
         }
 
         function descargarReporteMedico() {
-            let texto = "REPORTE MEDICO Y ALERGIAS - RETIRO 2026\n=================================\n\n";
+            let texto = "REPORTE MEDICO Y ALERGIAS (TODOS LOS GRUPOS) - RETIRO 2026\n=================================\n\n";
             let hay = false;
             for(let g in baseDatos.grupos) {
                 if(baseDatos.grupos[g].jovenes) {
                     baseDatos.grupos[g].jovenes.forEach(j => {
-                        let medString = String(j.med || '');
-                        let alergiaString = String(j.alergia || '');
-                        let horasArray = Array.isArray(j.horas) ? j.horas : (j.horas ? [j.horas] : []);
-
-                        let tomaMed = (medString.toLowerCase() !== 'ninguno' && medString.trim() !== '') || (horasArray.length > 0);
-                        let tieneAlergia = (alergiaString.toLowerCase() !== 'ninguna' && alergiaString.trim() !== '');
-                        
+                        let tomaMed = (j.med && j.med.toLowerCase() !== 'ninguno' && j.med.trim() !== '') || (j.horas && j.horas.length > 0);
+                        let tieneAlergia = (j.alergia && j.alergia.toLowerCase() !== 'ninguna' && j.alergia.trim() !== '');
                         if(tomaMed || tieneAlergia) {
                             hay = true;
                             texto += `GRUPO ${g} - ${j.nombre}\n`;
-                            if(tieneAlergia) texto += `  Alergia: ${alergiaString}\n`;
-                            if(tomaMed) texto += `  Medicamento: ${medString} (Horarios: ${horasArray.join(', ')})\n`;
+                            if(tieneAlergia) texto += `  Alergia: ${j.alergia}\n`;
+                            if(tomaMed) texto += `  Medicamento: ${j.med} (Horarios: ${(j.horas||[]).join(', ')})\n`;
                             texto += `  Tutor: ${j.contacto} - Cel: ${j.celular}\n\n`;
                         }
                     });
                 }
             }
-            if(!hay) texto += "No hay registros medicos.";
+            if(!hay) texto += "No hay registros médicos.";
             let blob = new Blob([texto], { type: "text/plain;charset=utf-8" });
             let url = URL.createObjectURL(blob);
             let a = document.createElement("a");
             a.href = url;
-            a.download = "Reporte_Medico_Retiro_2026.txt";
+            a.download = "Reporte_Medico_General_Retiro_2026.txt";
             a.click();
             URL.revokeObjectURL(url);
         }
@@ -850,11 +1078,10 @@
                     baseDatos.grupos[g].jovenes.forEach(j => { if(j.celular) todosLosJovenes.push(j); });
                 }
             }
-            if(todosLosJovenes.length === 0) { mostrarToast("No hay celulares registrados", "error"); return; }
+            if(todosLosJovenes.length === 0) { alert("No hay celulares registrados."); return; }
             let texto = tipo === 'llegada' ? "¡Hola! Les informamos desde el Retiro 2026 de San Martín de Porres que los jóvenes llegaron con bien." : "¡Hola! Las actividades concluyeron y estamos en camino de retorno.";
-            let celularBase = String(todosLosJovenes[0].celular || '').replace(/\s+/g, '');
-            let urlWsp = `https://wa.me/52${celularBase}?text=${encodeURIComponent(texto)}`;
-            mostrarToast(`Difusión iniciada para ${todosLosJovenes.length} tutores`, 'exito');
+            let urlWsp = `https://wa.me/52${todosLosJovenes[0].celular.replace(/\s+/g, '')}?text=${encodeURIComponent(texto)}`;
+            alert(`📢 Difusión iniciada para ${todosLosJovenes.length} tutores.`);
             window.open(urlWsp, '_blank');
         }
 
@@ -866,6 +1093,7 @@
             if (!baseDatos.gastos) baseDatos.gastos = [];
             if (!baseDatos.cronograma) baseDatos.cronograma = [];
         }
+
         function renderizarTodo() {
             repararBaseDatos();
             let rol = document.getElementById('select-rol').value;
@@ -880,105 +1108,81 @@
             tbodyPagos.innerHTML = '';
             selectAbono.innerHTML = '';
 
-            if(colAccionesHeader) colAccionesHeader.classList.remove('hidden');
+            colAccionesHeader.classList.remove('hidden');
             
-            if(colAccionGasto) {
-                if(rol === 'admin') {
-                    colAccionGasto.classList.remove('hidden');
-                } else {
-                    colAccionGasto.classList.add('hidden');
+            if(rol === 'admin') {
+                if(colAccionGasto) colAccionGasto.classList.remove('hidden');
+            } else {
+                if(colAccionGasto) colAccionGasto.classList.add('hidden');
+            }
+
+            let listaJovenesConGrupo = [];
+            for(let g in baseDatos.grupos) {
+                if(baseDatos.grupos[g].jovenes) {
+                    baseDatos.grupos[g].jovenes.forEach((j, idx) => {
+                        listaJovenesConGrupo.push({...j, grupo: g, indexOriginal: idx});
+                    });
                 }
             }
 
             let jovenesAMostrar = [];
             if(rol === 'admin') {
-                for(let g in baseDatos.grupos) {
-                    if(baseDatos.grupos[g].jovenes) {
-                        baseDatos.grupos[g].jovenes.forEach(j => jovenesAMostrar.push(Object.assign({}, j, {grupo: g})));
-                    }
-                }
+                jovenesAMostrar = listaJovenesConGrupo;
             } else {
-                let g = baseDatos.grupos[grupoNum];
-                if(g && g.jovenes) jovenesAMostrar = g.jovenes;
+                jovenesAMostrar = listaJovenesConGrupo.filter(j => j.grupo === grupoNum);
             }
 
             let totalRec = 0;
+            let totalEsperadoGeneral = listaJovenesConGrupo.length * costoBase;
+
             if(jovenesAMostrar.length === 0) {
-                tbodySalud.innerHTML = '<tr><td colspan="5" class="p-4 text-center text-slate-400">No hay jóvenes registrados.</td></tr>';
-                tbodyPagos.innerHTML = '<tr><td colspan="6" class="p-4 text-center text-slate-400">No hay cobros.</td></tr>';
+                tbodySalud.innerHTML = `<tr><td colspan="5" class="p-6 text-center text-slate-400 font-medium">No hay jóvenes registrados en este grupo.</td></tr>`;
+                tbodyPagos.innerHTML = `<tr><td colspan="6" class="p-6 text-center text-slate-400 font-medium">No hay cobros en este grupo.</td></tr>`;
             }
 
             jovenesAMostrar.forEach(j => {
-                let pagado = j.pagado || 0;
-                totalRec += pagado;
-                let pendiente = Math.max(0, costoBase - pagado);
-                
-                let estado = '';
-                if (pagado === 0) {
-                    estado = '<span class="px-3 py-1 bg-rose-50 text-rose-700 border border-rose-200 rounded-full font-black text-[10px] tracking-wide uppercase shadow-sm">Pendiente de Pago</span>';
-                } else if (pagado > 0 && pagado < costoBase) {
-                    estado = '<span class="px-3 py-1 bg-amber-50 text-amber-700 border border-amber-200 rounded-full font-black text-[10px] tracking-wide uppercase shadow-sm">A Cuenta</span>';
-                } else {
-                    estado = '<span class="px-3 py-1 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-full font-black text-[10px] tracking-wide uppercase shadow-sm"><i class="fa-solid fa-check mr-1"></i>Pago Completo</span>';
-                }
+                let pendienteItem = Math.max(0, costoBase - (j.pagado || 0));
+                selectAbono.innerHTML += `<option value="${j.grupo}|${j.nombre}">[G-${j.grupo}] ${j.nombre} (Debe: ${pendienteItem.toFixed(2)} Bs)</option>`;
+            });
 
-                let grp = j.grupo || grupoNum;
-                let grupoTag = rol === 'admin' ? '<span class="text-[9px] bg-rose-100 text-guindo px-1.5 py-0.5 rounded font-bold mr-1">G-' + grp + '</span>' : '';
+            jovenesAMostrar.forEach(j => {
+                totalRec += (j.pagado || 0);
+                let pendiente = Math.max(0, costoBase - (j.pagado || 0));
+                let estado = (j.pagado || 0) >= costoBase ? '<span class="px-3 py-1.5 bg-emerald-50 text-emerald-700 rounded-full font-black text-xs">✓ PAGO COMPLETO</span>' : '<span class="px-3 py-1.5 bg-amber-50 text-amber-700 rounded-full font-black text-xs">Incompleto</span>';
+                let grupoTag = `<span class="text-[10px] bg-rose-100 text-guindo px-2 py-0.5 rounded-md font-black mr-1.5">G-${j.grupo}</span>`;
 
-                let celularStr = String(j.celular || '');
-                let celularLimpio = celularStr.replace(/\s+/g, '');
-                let linkWsp = "https://wa.me/52" + celularLimpio + "?text=Hola%20" + encodeURIComponent(j.contacto || '');
-                
-                let nombreLimpio = String(j.nombre || '').replace(/'/g, "\\'");
-                let tdAccionAdmin = '<td class="p-3 text-center"><button onclick="eliminarJoven(\'' + nombreLimpio + '\', \'' + grp + '\')" class="text-rose-500 hover:text-rose-700 transition transform hover:scale-110 p-2"><i class="fa-solid fa-trash"></i></button></td>';
-
-                let horasArray = Array.isArray(j.horas) ? j.horas : (j.horas ? [j.horas] : []);
-                let horasUnidas = horasArray.join(', ');
+                let linkWsp = `https://wa.me/52${(j.celular || '').replace(/\s+/g, '')}?text=Hola%20${encodeURIComponent(j.contacto || '')}`;
+                let tdAccionAdmin = `<td class="p-4 text-center"><button type="button" onclick="eliminarJoven('${j.nombre}', '${j.grupo}')" class="text-rose-500 hover:text-rose-700 p-2.5 rounded-xl hover:bg-rose-50 transition cursor-pointer"><i class="fa-solid fa-trash text-base"></i></button></td>`;
 
                 tbodySalud.innerHTML += `
-                    <tr class="hover:bg-slate-50 transition border-b border-slate-100 last:border-0">
-                        <td class="p-3 font-bold">${grupoTag}${j.nombre}</td>
-                        <td class="p-3"><span class="px-2 py-0.5 bg-rose-50 text-rose-700 rounded">${j.alergia || 'Ninguna'}</span></td>
-                        <td class="p-3"><b>${j.med || 'Ninguno'}</b><br><span class="text-slate-400">${horasUnidas}</span></td>
-                        <td class="p-3">${j.contacto || ''}<br><a href="${linkWsp}" target="_blank" class="text-emerald-600 font-bold"><i class="fa-brands fa-whatsapp"></i> ${celularStr}</a></td>
+                    <tr class="hover:bg-slate-50/80 transition">
+                        <td class="p-4 font-bold text-slate-900">${grupoTag}${j.nombre}</td>
+                        <td class="p-4"><span class="px-2.5 py-1 bg-rose-50 text-rose-700 rounded-lg font-medium">${j.alergia}</span></td>
+                        <td class="p-4"><b class="text-slate-900">${j.med}</b><br><span class="text-slate-400 text-xs">${(j.horas || []).join(', ')}</span></td>
+                        <td class="p-4">${j.contacto}<br><a href="${linkWsp}" target="_blank" class="text-emerald-600 hover:text-emerald-700 font-bold inline-flex items-center gap-1 mt-1"><i class="fa-brands fa-whatsapp text-base"></i> ${j.celular}</a></td>
                         ${tdAccionAdmin}
                     </tr>
                 `;
 
-                // Historial de abonos
-                let histHTML = '';
-                if (j.historial && Array.isArray(j.historial) && j.historial.length > 0) {
-                    histHTML = j.historial.map(h => {
-                        let obj = (typeof h === 'object') ? h : { monto: h, fecha: '' }; // Compatibilidad
-                        let m = obj.monto !== undefined ? obj.monto : obj;
-                        let f = obj.fecha ? ` <span class="text-slate-400 font-normal">(${obj.fecha})</span>` : '';
-                        return `<span class="bg-white px-2 py-1 rounded shadow-sm border border-slate-200 text-[10px] font-bold text-slate-700 mr-1 mb-1 inline-block">💰 ${m} Bs${f}</span>`;
-                    }).join('');
-                } else if (j.historial && typeof j.historial === 'string') {
-                    histHTML = `<span class="bg-white px-2 py-1 rounded shadow-sm border border-slate-200 text-[10px] font-bold text-slate-700 mr-1 mb-1 inline-block">💰 ${j.historial}</span>`;
-                } else if (j.historial && Array.isArray(j.historial) && j.historial.length > 0 && typeof j.historial[0] === 'string') {
-                    histHTML = j.historial.map(h => `<span class="bg-white px-2 py-1 rounded shadow-sm border border-slate-200 text-[10px] font-bold text-slate-700 mr-1 mb-1 inline-block">💰 ${h}</span>`).join('');
-                } else {
-                    histHTML = '<span class="text-slate-300 italic text-xs">Sin abonos</span>';
-                }
-
+                let hist = (j.historial || []).map(h => `<span class="inline-block bg-slate-100 px-2.5 py-1 rounded-xl m-0.5 border text-xs"><i class="fa-solid fa-sack-dollar text-amber-500 mr-1"></i>${h}</span>`).join('<br>') || 'Sin abonos';
                 tbodyPagos.innerHTML += `
-                    <tr class="hover:bg-slate-50 transition border-b border-slate-100 last:border-0">
-                        <td class="p-3 font-bold">${grupoTag}${j.nombre}</td>
-                        <td class="p-3">${histHTML}</td>
-                        <td class="p-3 font-black text-emerald-600">${pagado.toFixed(2)} Bs</td>
-                        <td class="p-3 font-black text-amber-600">${pendiente.toFixed(2)} Bs</td>
-                        <td class="p-3 text-center">${estado}</td>
-                        <td class="p-3 text-center">
-                            <button onclick="editarCobroJoven('${nombreLimpio}', '${grp}', ${pagado})" class="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold px-3 py-1.5 rounded-lg transition shadow-sm text-[11px] transform hover:scale-105"><i class="fa-solid fa-pen-to-square mr-1"></i> Editar</button>
+                    <tr class="hover:bg-slate-50/80 transition">
+                        <td class="p-4 font-bold text-slate-900">${grupoTag}${j.nombre}</td>
+                        <td class="p-4 text-slate-600 leading-relaxed text-xs">${hist}</td>
+                        <td class="p-4 font-black text-emerald-600 text-base">${(j.pagado || 0).toFixed(2)} Bs</td>
+                        <td class="p-4 font-black text-amber-600 text-base">${pendiente.toFixed(2)} Bs</td>
+                        <td class="p-4 text-center">${estado}</td>
+                        <td class="p-4 text-center">
+                            <button type="button" onclick="prepararEditarPago('${j.grupo}', ${j.indexOriginal})" class="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold px-4 py-2.5 rounded-2xl shadow-sm border border-indigo-200 transition inline-flex items-center gap-1.5 cursor-pointer">
+                                <i class="fa-solid fa-pen-to-square text-base"></i> Editar
+                            </button>
                         </td>
                     </tr>
                 `;
-                selectAbono.innerHTML += `<option value="${j.nombre}">${grupoTag}${j.nombre} (Debe: ${pendiente} Bs)</option>`;
             });
 
             document.getElementById('stat-recaudado').innerText = totalRec.toFixed(2) + " Bs";
-            document.getElementById('stat-pendiente').innerText = ((jovenesAMostrar.length * costoBase) - totalRec).toFixed(2) + " Bs";
+            document.getElementById('stat-pendiente').innerText = Math.max(0, totalEsperadoGeneral - totalRec).toFixed(2) + " Bs";
             renderizarComisiones();
             renderizarExpositores();
             renderizarGastos();
@@ -986,22 +1190,23 @@
         }
 
         function eliminarJoven(nombre, grupoG) {
-            if(confirm('¿Eliminar a ' + nombre + '?')) {
+            if(confirm('¿Eliminar a ' + nombre + ' del Grupo ' + grupoG + '?')) {
                 baseDatos.grupos[grupoG].jovenes = baseDatos.grupos[grupoG].jovenes.filter(j => j.nombre !== nombre);
                 guardarDatos();
             }
         }
+
         function renderizarComisiones() {
             let rol = document.getElementById('select-rol').value;
             let grid = document.getElementById('grid-comisiones');
             grid.innerHTML = '';
             (baseDatos.comisiones || []).forEach((c, index) => {
-                let encHtml = (c.encargados || []).map(en => `<div class="flex items-center space-x-1.5"><i class="fa-solid fa-user-check text-emerald-500"></i><span>${en}</span></div>`).join('');
-                let btnEliminar = rol === 'admin' ? `<button onclick="baseDatos.comisiones.splice(${index}, 1); guardarDatos();" class="text-rose-500 text-xs font-bold"><i class="fa-solid fa-trash"></i></button>` : '';
+                let encHtml = (c.encargados || []).map(en => `<div class="flex items-center space-x-2 py-1"><i class="fa-solid fa-user-check text-emerald-500"></i><span class="font-medium">${en}</span></div>`).join('');
+                let btnEliminar = rol === 'admin' ? `<button type="button" onclick="baseDatos.comisiones.splice(${index}, 1); guardarDatos();" class="text-rose-500 hover:text-rose-700 p-2 rounded-xl transition cursor-pointer"><i class="fa-solid fa-trash text-base"></i></button>` : '';
                 grid.innerHTML += `
-                    <div class="bg-white p-5 rounded-3xl shadow-sm border space-y-2">
-                        <div class="flex justify-between items-center"><h3 class="font-black text-slate-900 text-xs flex items-center space-x-1.5"><i class="fa-solid fa-users text-guindo"></i><span>${c.nombre}</span></h3>${btnEliminar}</div>
-                        <div class="bg-slate-50 p-3 rounded-xl border text-xs space-y-1 font-medium">${encHtml}</div>
+                    <div class="bg-white p-6 rounded-[2rem] shadow-sm border space-y-3 hover:shadow-md transition">
+                        <div class="flex justify-between items-center"><h3 class="font-black text-slate-900 text-sm flex items-center space-x-2"><i class="fa-solid fa-users text-guindo text-base"></i><span>${c.nombre}</span></h3>${btnEliminar}</div>
+                        <div class="bg-slate-50 p-4 rounded-2xl border text-xs space-y-1">${encHtml}</div>
                     </div>
                 `;
             });
@@ -1013,20 +1218,20 @@
             grid.innerHTML = '';
             (baseDatos.expositores || []).forEach((e, index) => {
                 let botonesAdmin = rol === 'admin' ? `
-                    <div class="mt-2 flex space-x-3 text-xs">
-                        <button onclick="editarExpositor(${index})" class="text-indigo-600 font-bold"><i class="fa-solid fa-pen"></i> Editar</button>
-                        <button onclick="baseDatos.expositores.splice(${index}, 1); guardarDatos();" class="text-rose-500 font-bold"><i class="fa-solid fa-trash"></i></button>
+                    <div class="mt-3 flex space-x-4 text-xs font-bold pt-2 border-t border-slate-100">
+                        <button type="button" onclick="editarExpositor(${index})" class="text-indigo-600 hover:text-indigo-800 transition cursor-pointer"><i class="fa-solid fa-pen mr-1"></i> Editar</button>
+                        <button type="button" onclick="baseDatos.expositores.splice(${index}, 1); guardarDatos();" class="text-rose-500 hover:text-rose-700 transition cursor-pointer"><i class="fa-solid fa-trash mr-1"></i> Eliminar</button>
                     </div>
                 ` : '';
 
                 grid.innerHTML += `
-                    <div class="bg-white p-5 rounded-3xl shadow-sm border flex items-center space-x-3">
-                        <div class="w-14 h-14 rounded-xl bg-slate-100 overflow-hidden flex-shrink-0 border shadow-sm">
+                    <div class="bg-white p-6 rounded-[2rem] shadow-sm border flex items-center space-x-4 hover:shadow-md transition">
+                        <div class="w-16 h-16 rounded-2xl bg-slate-100 overflow-hidden flex-shrink-0 border-2 shadow-inner">
                             <img src="${e.foto}" alt="Expositor" onerror="this.onerror=null;this.src='https://cdn-icons-png.flaticon.com/512/3135/3135715.png';" class="w-full h-full object-cover">
                         </div>
                         <div class="flex-grow">
-                            <h3 class="font-black text-slate-900 text-xs">${e.nombre}</h3>
-                            <p class="text-[11px] text-guindo font-bold">${e.tema}</p>
+                            <h3 class="font-black text-slate-900 text-sm">${e.nombre}</h3>
+                            <p class="text-xs text-guindo font-bold mt-0.5">${e.tema}</p>
                             ${botonesAdmin}
                         </div>
                     </div>
@@ -1036,16 +1241,18 @@
 
         function renderizarGastos() {
             let rol = document.getElementById('select-rol').value;
+            if(rol !== 'admin') return; 
+
             let tbody = document.getElementById('tabla-gastos-body');
             tbody.innerHTML = '';
-            if((baseDatos.gastos || []).length === 0) { tbody.innerHTML = '<tr><td colspan="4" class="p-3 text-center text-slate-400">Sin gastos.</td></tr>'; return; }
+            if((baseDatos.gastos || []).length === 0) { tbody.innerHTML = `<tr><td colspan="4" class="p-6 text-center text-slate-400 font-medium">Sin gastos registrados.</td></tr>`; return; }
             baseDatos.gastos.forEach(g => {
-                let tdAccionGasto = rol === 'admin' ? `<td class="p-3 text-center"><button onclick="baseDatos.gastos = baseDatos.gastos.filter(x => x.id !== ${g.id}); guardarDatos();" class="text-rose-500"><i class="fa-solid fa-trash"></i></button></td>` : '';
+                let tdAccionGasto = `<td class="p-4 text-center"><button type="button" onclick="baseDatos.gastos = baseDatos.gastos.filter(x => x.id !== ${g.id}); guardarDatos();" class="text-rose-500 hover:text-rose-700 p-2 rounded-xl transition cursor-pointer"><i class="fa-solid fa-trash text-base"></i></button></td>`;
                 tbody.innerHTML += `
-                    <tr class="hover:bg-slate-50">
-                        <td class="p-3 font-bold text-guindo">${g.categoria}</td>
-                        <td class="p-3">${g.desc}</td>
-                        <td class="p-3 font-bold text-rose-600">- ${(g.monto || 0).toFixed(2)} Bs</td>
+                    <tr class="hover:bg-slate-50/80 transition">
+                        <td class="p-4 font-bold text-guindo">${g.categoria}</td>
+                        <td class="p-4">${g.desc}</td>
+                        <td class="p-4 font-black text-rose-600 text-base">- ${(g.monto || 0).toFixed(2)} Bs</td>
                         ${tdAccionGasto}
                     </tr>
                 `;
@@ -1058,13 +1265,13 @@
             (baseDatos.cronograma || []).forEach(a => {
                 let check = a.hecho ? 'checked' : '';
                 cont.innerHTML += `
-                    <div class="bg-white p-4 rounded-3xl shadow-sm border flex items-center justify-between gap-3">
-                        <div class="flex items-center space-x-3">
-                            <input type="checkbox" ${check} onchange="a.hecho = !a.hecho; guardarDatos();" class="w-5 h-5 text-guindo rounded cursor-pointer">
+                    <div class="bg-white p-5 rounded-[2rem] shadow-sm border flex items-center justify-between gap-4 hover:shadow-md transition">
+                        <div class="flex items-center space-x-4">
+                            <input type="checkbox" ${check} onchange="a.hecho = !a.hecho; guardarDatos();" class="w-6 h-6 text-guindo rounded-lg cursor-pointer accent-[#581823]">
                             <div>
-                                <span class="text-[11px] font-black text-guindo">${a.hora}</span>
-                                <h4 class="font-black text-slate-900 text-xs">${a.titulo}</h4>
-                                <p class="text-[11px] text-slate-400">Resp: ${a.resp}</p>
+                                <span class="text-xs font-black text-guindo tracking-wide uppercase bg-rose-50 px-2.5 py-0.5 rounded-md">${a.hora}</span>
+                                <h4 class="font-black text-slate-900 text-sm mt-1">${a.titulo}</h4>
+                                <p class="text-xs text-slate-500 mt-0.5"><i class="fa-solid fa-user-tag mr-1 text-amber-500"></i> Resp: ${a.resp}</p>
                             </div>
                         </div>
                     </div>
@@ -1072,98 +1279,38 @@
             });
         }
 
-        function mostrarToast(mensaje, tipo = 'exito') {
-            let container = document.getElementById('toast-container');
-            let toast = document.createElement('div');
-            let icon = '';
-            let bg = '';
-            let duration = 3000;
-            let textClass = "font-bold text-slate-700 text-sm";
-            
-            if(tipo === 'exito') {
-                icon = '<i class="fa-solid fa-circle-check text-emerald-500 text-xl"></i>';
-                bg = 'bg-white border-l-4 border-emerald-500';
-            } else if(tipo === 'error') {
-                icon = '<i class="fa-solid fa-circle-exclamation text-rose-500 text-xl"></i>';
-                bg = 'bg-white border-l-4 border-rose-500';
-            } else if(tipo === 'medico') {
-                icon = '<i class="fa-solid fa-bell text-white text-3xl animate-bounce"></i>';
-                bg = 'bg-gradient-to-r from-rose-600 to-rose-900 border-l-4 border-white shadow-[0_0_30px_rgba(225,29,72,0.8)]';
-                textClass = "font-bold text-white text-[13px]";
-                duration = 20000; // Queda 20 segundos en pantalla
-            }
-            
-            toast.className = `${bg} shadow-2xl rounded-r-xl p-4 flex items-center gap-4 transform transition-all duration-300 translate-y-10 opacity-0 min-w-[250px] max-w-sm`;
-            toast.innerHTML = `${icon} <div class="${textClass}">${mensaje}</div>`;
-            
-            container.appendChild(toast);
-            setTimeout(() => { toast.classList.remove('translate-y-10', 'opacity-0'); }, 10);
-            setTimeout(() => {
-                toast.classList.add('translate-y-10', 'opacity-0');
-                setTimeout(() => { toast.remove(); }, 300);
-            }, duration);
-        }
-
-        // --- SISTEMA DE ALARMA MEDICA AUTOMATICA ---
-        let alarmasMostradas = {};
-        function revisarHorariosMedicos() {
-            if(!baseDatos || !baseDatos.grupos) return;
-            let ahora = new Date();
-            let horaActual = ahora.getHours().toString().padStart(2, '0') + ':' + ahora.getMinutes().toString().padStart(2, '0');
-            let fechaHoy = ahora.toDateString();
-
-            for(let g in baseDatos.grupos) {
-                if(baseDatos.grupos[g].jovenes) {
-                    baseDatos.grupos[g].jovenes.forEach(j => {
-                        let horasArray = Array.isArray(j.horas) ? j.horas : (j.horas ? [j.horas] : []);
-                        if(horasArray.length > 0 && j.med && String(j.med).toLowerCase() !== 'ninguno') {
-                            if(horasArray.includes(horaActual)) {
-                                let key = j.nombre + '_' + horaActual + '_' + fechaHoy;
-                                if(!alarmasMostradas[key]) {
-                                    alarmasMostradas[key] = true;
-                                    let msj = `<div class="uppercase tracking-widest text-[10px] text-rose-200 mb-1">¡Alarma Médica!</div><div class="text-base font-black mb-1">${j.nombre} (G-${g})</div><div class="font-medium text-rose-100">Debe tomar: <b class="text-white">${j.med}</b> ahora.</div>`;
-                                    mostrarToast(msj, 'medico');
-                                }
-                            }
-                        }
-                    });
-                }
-            }
-        }
-        setInterval(revisarHorariosMedicos, 30000); // Revisa el reloj cada 30 segundos
-
-        // CARGA Y ESCUCHA EN TIEMPO REAL DESDE FIREBASE O LOCAL
         window.onload = function() {
-            if (esFirebaseConfigurado()) {
-                try {
-                    db.collection("retiro_datos").doc("principal").onSnapshot((doc) => {
-                        if (doc.exists) {
-                            baseDatos = doc.data();
-                            renderizarTodo();
-                        } else {
-                            guardarDatos();
-                            renderizarTodo();
-                        }
-                    }, (error) => {
-                        console.error("Firebase Snapshot Error:", error);
-                        cargarDatosLocales();
-                    });
-                } catch (e) {
-                    cargarDatosLocales();
-                }
-            } else { cargarDatosLocales(); }
-        };
+            let rolGuardado = localStorage.getItem('retiro_rol') || 'catequista';
+            aplicarPermisosRol(rolGuardado);
 
-        function cargarDatosLocales() {
+            // 1. Cargar rápido desde localStorage
             let localData = localStorage.getItem("retiro_datos");
             if (localData) {
-                baseDatos = JSON.parse(localData);
-            } else {
-                guardarDatos();
+                try {
+                    let parsed = JSON.parse(localData);
+                    if (parsed && parsed.grupos) baseDatos = parsed;
+                } catch(e) { console.error("Error caché local", e); }
             }
             renderizarTodo();
-        }
+
+            // 2. Conectar a Firebase correctamente
+            if (esFirebaseConfigurado()) {
+                db.collection("retiro_datos").doc("principal").onSnapshot((doc) => {
+                    if (doc.exists) {
+                        let remoteData = doc.data();
+                        if (remoteData && remoteData.grupos) {
+                            baseDatos = remoteData;
+                            localStorage.setItem("retiro_datos", JSON.stringify(baseDatos));
+                            renderizarTodo();
+                        }
+                    }
+                }, (error) => {
+                    console.error("Error Firebase Snapshot:", error);
+                });
+            }
+        };
     </script>
-    <div id="toast-container" class="fixed bottom-5 right-5 z-[100] flex flex-col gap-2"></div>
 </body>
 </html>
+
+
