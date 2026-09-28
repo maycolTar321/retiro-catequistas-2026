@@ -1152,14 +1152,14 @@
                 let grupoTag = `<span class="text-[10px] bg-rose-100 text-guindo px-2 py-0.5 rounded-md font-black mr-1.5">G-${j.grupo}</span>`;
 
                 let linkWsp = `https://wa.me/52${(j.celular || '').replace(/\s+/g, '')}?text=Hola%20${encodeURIComponent(j.contacto || '')}`;
-                let tdAccionAdmin = `<td class="p-4 text-center"><button type="button" onclick="eliminarJoven('${j.nombre}', '${j.grupo}')" class="text-rose-500 hover:text-rose-700 p-2.5 rounded-xl hover:bg-rose-50 transition cursor-pointer"><i class="fa-solid fa-trash text-base"></i></button></td>`;
+                let tdAccionAdmin = `<td class="p-4 text-center whitespace-nowrap"><button type="button" onclick="eliminarJoven('${j.nombre}', '${j.grupo}')" class="text-rose-500 hover:text-rose-700 p-2.5 rounded-xl hover:bg-rose-50 transition cursor-pointer"><i class="fa-solid fa-trash text-base"></i></button></td>`;
 
                 tbodySalud.innerHTML += `
                     <tr class="hover:bg-slate-50/80 transition">
-                        <td class="p-4 font-bold text-slate-900">${grupoTag}${j.nombre}</td>
-                        <td class="p-4"><span class="px-2.5 py-1 bg-rose-50 text-rose-700 rounded-lg font-medium">${j.alergia}</span></td>
-                        <td class="p-4"><b class="text-slate-900">${j.med}</b><br><span class="text-slate-400 text-xs">${(j.horas || []).join(', ')}</span></td>
-                        <td class="p-4">${j.contacto}<br><a href="${linkWsp}" target="_blank" class="text-emerald-600 hover:text-emerald-700 font-bold inline-flex items-center gap-1 mt-1"><i class="fa-brands fa-whatsapp text-base"></i> ${j.celular}</a></td>
+                        <td class="p-4 font-bold whitespace-nowrap text-slate-900">${grupoTag}${j.nombre}</td>
+                        <td class="p-4 whitespace-nowrap"><span class="px-2.5 py-1 bg-rose-50 text-rose-700 rounded-lg font-medium">${j.alergia}</span></td>
+                        <td class="p-4 whitespace-nowrap"><b class="text-slate-900">${j.med}</b><br><span class="text-slate-400 text-xs">${(j.horas || []).join(', ')}</span></td>
+                        <td class="p-4 whitespace-nowrap">${j.contacto}<br><a href="${linkWsp}" target="_blank" class="text-emerald-600 hover:text-emerald-700 font-bold inline-flex items-center gap-1 mt-1"><i class="fa-brands fa-whatsapp text-base"></i> ${j.celular}</a></td>
                         ${tdAccionAdmin}
                     </tr>
                 `;
@@ -1167,11 +1167,11 @@
                 let hist = (j.historial || []).map(h => `<span class="inline-block bg-slate-100 px-2.5 py-1 rounded-xl m-0.5 border text-xs"><i class="fa-solid fa-sack-dollar text-amber-500 mr-1"></i>${h}</span>`).join('<br>') || 'Sin abonos';
                 tbodyPagos.innerHTML += `
                     <tr class="hover:bg-slate-50/80 transition">
-                        <td class="p-4 font-bold text-slate-900">${grupoTag}${j.nombre}</td>
-                        <td class="p-4 text-slate-600 leading-relaxed text-xs">${hist}</td>
-                        <td class="p-4 font-black text-emerald-600 text-base">${(j.pagado || 0).toFixed(2)} Bs</td>
-                        <td class="p-4 font-black text-amber-600 text-base">${pendiente.toFixed(2)} Bs</td>
-                        <td class="p-4 text-center">${estado}</td>
+                        <td class="p-4 font-bold whitespace-nowrap text-slate-900">${grupoTag}${j.nombre}</td>
+                        <td class="p-4 text-slate-600 leading-relaxed text-xs whitespace-nowrap">${hist}</td>
+                        <td class="p-4 font-black text-emerald-600 text-base whitespace-nowrap">${(j.pagado || 0).toFixed(2)} Bs</td>
+                        <td class="p-4 font-black text-amber-600 text-base whitespace-nowrap">${pendiente.toFixed(2)} Bs</td>
+                        <td class="p-4 text-center whitespace-nowrap">${estado}</td>
                         <td class="p-4 text-center">
                             <button type="button" onclick="prepararEditarPago('${j.grupo}', ${j.indexOriginal})" class="bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold px-4 py-2.5 rounded-2xl shadow-sm border border-indigo-200 transition inline-flex items-center gap-1.5 cursor-pointer">
                                 <i class="fa-solid fa-pen-to-square text-base"></i> Editar
@@ -1247,10 +1247,10 @@
             tbody.innerHTML = '';
             if((baseDatos.gastos || []).length === 0) { tbody.innerHTML = `<tr><td colspan="4" class="p-6 text-center text-slate-400 font-medium">Sin gastos registrados.</td></tr>`; return; }
             baseDatos.gastos.forEach(g => {
-                let tdAccionGasto = `<td class="p-4 text-center"><button type="button" onclick="baseDatos.gastos = baseDatos.gastos.filter(x => x.id !== ${g.id}); guardarDatos();" class="text-rose-500 hover:text-rose-700 p-2 rounded-xl transition cursor-pointer"><i class="fa-solid fa-trash text-base"></i></button></td>`;
+                let tdAccionGasto = `<td class="p-4 text-center whitespace-nowrap"><button type="button" onclick="baseDatos.gastos = baseDatos.gastos.filter(x => x.id !== ${g.id}); guardarDatos();" class="text-rose-500 hover:text-rose-700 p-2 rounded-xl transition cursor-pointer"><i class="fa-solid fa-trash text-base"></i></button></td>`;
                 tbody.innerHTML += `
                     <tr class="hover:bg-slate-50/80 transition">
-                        <td class="p-4 font-bold text-guindo">${g.categoria}</td>
+                        <td class="p-4 font-bold whitespace-nowrap text-guindo">${g.categoria}</td>
                         <td class="p-4">${g.desc}</td>
                         <td class="p-4 font-black text-rose-600 text-base">- ${(g.monto || 0).toFixed(2)} Bs</td>
                         ${tdAccionGasto}
@@ -1312,5 +1312,6 @@
     </script>
 </body>
 </html>
+
 
 
