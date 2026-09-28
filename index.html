@@ -594,6 +594,7 @@
                     await db.collection("retiro_datos").doc("principal").set(datosLimpios);
                 } catch(e) {
                     console.error("Error crítico al guardar en Firebase:", e);
+                    alert("⚠️ Error al guardar en Firebase: " + e.message + "\n\n¡Si acabas de subir una foto, es demasiado grande! Firebase solo permite 1MB. Por favor, recarga la página e intenta subir una imagen de menor resolución o sin foto.");
                 }
             }
             renderizarTodo();
