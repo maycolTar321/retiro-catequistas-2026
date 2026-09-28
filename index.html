@@ -497,29 +497,34 @@
     </div>
 
     <div id="modal-actividad" class="fixed inset-0 bg-slate-950/70 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
-        <div class="bg-white rounded-[2rem] p-6 sm:p-8 max-w-md w-full shadow-2xl space-y-4 text-sm">
-            <h3 id="titulo-modal-actividad" class="text-lg font-black text-slate-900">Programar Actividad</h3>
-            <p class="text-xs text-slate-500 -mt-2">Puedes guardar y seguir agregando más actividades sin cerrar esta ventana.</p>
-            <form onsubmit="guardarActividad(event)" class="space-y-4">
+        <div class="bg-white rounded-[2rem] p-5 sm:p-8 max-w-lg w-full shadow-2xl space-y-4 text-sm max-h-[90vh] flex flex-col">
+            <div class="flex justify-between items-center flex-shrink-0">
+                <h3 id="titulo-modal-actividad" class="text-lg font-black text-slate-900">Programar Actividades</h3>
+                <button type="button" onclick="cerrarModal('modal-actividad')" class="text-slate-400 hover:text-slate-600 p-1"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+            
+            <div class="flex-shrink-0">
+                <label class="block font-bold text-slate-700 mb-1 text-xs uppercase">Día del Retiro</label>
+                <select id="act-dia" class="w-full p-3 rounded-xl border outline-none font-bold text-slate-800 bg-slate-50 shadow-inner text-sm">
+                    <option value="Sábado 24 de Octubre">Sábado 24 de Octubre</option>
+                    <option value="Domingo 25 de Octubre">Domingo 25 de Octubre</option>
+                </select>
+            </div>
+
+            <form id="form-actividades" onsubmit="guardarActividades(event)" class="overflow-y-auto pr-1 space-y-3 flex-grow pb-2 scrollbar-none" style="scrollbar-width: thin;">
                 <input type="hidden" id="act-id" value="">
-                <div class="grid grid-cols-2 gap-3">
-                    <div class="col-span-2">
-                        <label class="block font-bold text-slate-700 mb-1.5 text-xs uppercase">Día del Retiro</label>
-                        <select id="act-dia" class="w-full p-3.5 rounded-2xl border outline-none font-bold text-slate-800 bg-slate-50 shadow-inner">
-                            <option value="Sábado 24 de Octubre">Sábado 24 de Octubre</option>
-                            <option value="Domingo 25 de Octubre">Domingo 25 de Octubre</option>
-                        </select>
-                    </div>
-                    <div><label class="block font-bold text-slate-700 mb-1.5 text-xs uppercase">Inicio</label><input type="time" id="act-hora-inicio" required class="w-full p-3.5 rounded-2xl border outline-none font-bold shadow-inner"></div>
-                    <div><label class="block font-bold text-slate-700 mb-1.5 text-xs uppercase">Fin</label><input type="time" id="act-hora-fin" required class="w-full p-3.5 rounded-2xl border outline-none font-bold shadow-inner"></div>
-                </div>
-                <div><label class="block font-bold text-slate-700 mb-1.5 text-xs uppercase">Título</label><input type="text" id="act-titulo" required class="capitalized-text w-full p-3.5 rounded-2xl border outline-none shadow-inner" placeholder="Oración"></div>
-                <div><label class="block font-bold text-slate-700 mb-1.5 text-xs uppercase">Responsable</label><input type="text" id="act-resp" required class="capitalized-text w-full p-3.5 rounded-2xl border outline-none shadow-inner" placeholder="Catequistas"></div>
-                <div class="flex space-x-3 pt-3">
-                    <button type="button" onclick="cerrarModal('modal-actividad')" class="w-1/2 bg-slate-100 hover:bg-slate-200 py-3.5 rounded-2xl font-bold text-slate-600 transition">Cerrar</button>
-                    <button type="submit" class="w-1/2 bg-guindo hover:bg-[#44121b] text-white py-3.5 rounded-2xl font-bold shadow-md transition">Guardar</button>
-                </div>
+                
+                <div id="contenedor-filas-act"></div>
+                
+                <button type="button" onclick="agregarFilaActividad()" id="btn-add-fila" class="w-full bg-indigo-50/50 text-indigo-600 hover:bg-indigo-100 font-bold py-3 rounded-xl border border-indigo-200 border-dashed transition flex justify-center items-center gap-2 mt-2">
+                    <i class="fa-solid fa-plus"></i> Añadir otra actividad abajo
+                </button>
             </form>
+
+            <div class="flex space-x-3 pt-3 border-t border-slate-100 flex-shrink-0">
+                <button type="button" onclick="cerrarModal('modal-actividad')" class="w-1/2 bg-slate-100 hover:bg-slate-200 py-3.5 rounded-2xl font-bold text-slate-600 transition">Cancelar</button>
+                <button type="button" onclick="document.getElementById('form-actividades').requestSubmit()" class="w-1/2 bg-guindo hover:bg-[#44121b] text-white py-3.5 rounded-2xl font-bold shadow-md transition">Guardar Todo</button>
+            </div>
         </div>
     </div>
 
@@ -948,42 +953,62 @@
             });
         }
 
-        function guardarActividad(e) {
+        function agregarFilaActividad(inicio='', fin='', titulo='', resp='Catequistas') {
+            let container = document.getElementById('contenedor-filas-act');
+            let div = document.createElement('div');
+            div.className = "bg-white p-4 rounded-2xl border border-slate-200 relative fila-actividad shadow-sm mb-3 mt-2";
+            div.innerHTML = `
+                <button type="button" onclick="this.parentElement.remove()" class="absolute -top-3 -right-2 bg-rose-500 text-white w-6 h-6 rounded-full flex justify-center items-center shadow-md hover:bg-rose-600 z-10 btn-delete-fila"><i class="fa-solid fa-xmark text-[10px]"></i></button>
+                <div class="grid grid-cols-2 gap-3 mb-3">
+                    <div><label class="block font-bold text-slate-500 mb-1 text-[10px] uppercase">Inicio</label><input type="time" required value="${inicio}" class="input-act-inicio w-full p-2.5 rounded-xl border outline-none font-bold bg-slate-50 text-xs"></div>
+                    <div><label class="block font-bold text-slate-500 mb-1 text-[10px] uppercase">Fin</label><input type="time" required value="${fin}" class="input-act-fin w-full p-2.5 rounded-xl border outline-none font-bold bg-slate-50 text-xs"></div>
+                </div>
+                <div class="space-y-3">
+                    <div><label class="block font-bold text-slate-500 mb-1 text-[10px] uppercase">Título de Actividad</label><input type="text" required value="${titulo}" class="input-act-titulo capitalized-text w-full p-2.5 rounded-xl border outline-none bg-slate-50 text-xs" placeholder="Ej: Oración de la mañana"></div>
+                    <div><label class="block font-bold text-slate-500 mb-1 text-[10px] uppercase">Responsable</label><input type="text" required value="${resp}" class="input-act-resp capitalized-text w-full p-2.5 rounded-xl border outline-none bg-slate-50 text-xs"></div>
+                </div>
+            `;
+            container.appendChild(div);
+        }
+
+        function guardarActividades(e) {
             e.preventDefault();
             let id = document.getElementById('act-id').value;
-            let dia = document.getElementById('act-dia') ? document.getElementById('act-dia').value : 'Día sin especificar';
-            let inicio = document.getElementById('act-hora-inicio').value;
-            let fin = document.getElementById('act-hora-fin').value;
-            let hora = `${inicio} - ${fin}`;
-            let titulo = document.getElementById('act-titulo').value;
-            let resp = document.getElementById('act-resp').value;
+            let dia = document.getElementById('act-dia').value;
             
+            let filas = document.querySelectorAll('.fila-actividad');
+            if(filas.length === 0) return;
+
             if(id) {
+                let fila = filas[0];
                 let a = baseDatos.cronograma.find(x => x.id === parseInt(id));
                 if(a) {
                     a.dia = dia;
-                    a.hora = hora;
-                    a.titulo = titulo;
-                    a.resp = resp;
+                    a.hora = `${fila.querySelector('.input-act-inicio').value} - ${fila.querySelector('.input-act-fin').value}`;
+                    a.titulo = fila.querySelector('.input-act-titulo').value;
+                    a.resp = fila.querySelector('.input-act-resp').value;
                 }
-                guardarDatos().then(() => {
-                    cerrarModal('modal-actividad');
-                    if(typeof mostrarToast === 'function') mostrarToast('Actividad actualizada', 'exito');
-                    else alert('✨ Actividad actualizada');
-                });
             } else {
                 if(!baseDatos.cronograma) baseDatos.cronograma = [];
-                baseDatos.cronograma.push({ id: Date.now(), dia, hora, titulo, resp, hecho: false });
-                
-                guardarDatos().then(() => {
-                    document.getElementById('act-titulo').value = '';
-                    document.getElementById('act-hora-inicio').value = fin; 
-                    document.getElementById('act-hora-fin').value = '';
-                    document.getElementById('act-hora-fin').focus();
-                    if(typeof mostrarToast === 'function') mostrarToast('¡Agregada! Sigue con la próxima', 'exito');
-                    else alert('✨ ¡Agregada! Sigue con la próxima');
+                filas.forEach((fila, idx) => {
+                    let inicio = fila.querySelector('.input-act-inicio').value;
+                    let fin = fila.querySelector('.input-act-fin').value;
+                    baseDatos.cronograma.push({ 
+                        id: Date.now() + idx, 
+                        dia: dia, 
+                        hora: `${inicio} - ${fin}`, 
+                        titulo: fila.querySelector('.input-act-titulo').value, 
+                        resp: fila.querySelector('.input-act-resp').value, 
+                        hecho: false 
+                    });
                 });
             }
+            
+            guardarDatos().then(() => {
+                cerrarModal('modal-actividad');
+                if(typeof mostrarToast === 'function') mostrarToast('¡Cronograma actualizado!', 'exito');
+                else alert('✨ ¡Cronograma actualizado!');
+            });
         }
 
         function actualizarPrecioBase(e) {
@@ -1372,28 +1397,29 @@
             let a = baseDatos.cronograma.find(x => x.id === id);
             if(a) {
                 document.getElementById('act-id').value = a.id;
-                if(document.getElementById('act-dia') && a.dia) {
-                    document.getElementById('act-dia').value = a.dia;
-                }
-                let partes = a.hora.split(' - ');
-                if(partes.length === 2) {
-                    document.getElementById('act-hora-inicio').value = partes[0].trim();
-                    document.getElementById('act-hora-fin').value = partes[1].trim();
-                }
-                document.getElementById('act-titulo').value = a.titulo;
-                document.getElementById('act-resp').value = a.resp;
+                if(document.getElementById('act-dia') && a.dia) document.getElementById('act-dia').value = a.dia;
+                
                 document.getElementById('titulo-modal-actividad').innerText = 'Editar Actividad';
+                document.getElementById('btn-add-fila').classList.add('hidden');
+                document.getElementById('contenedor-filas-act').innerHTML = '';
+                
+                let partes = a.hora.split(' - ');
+                agregarFilaActividad(partes[0] ? partes[0].trim() : '', partes[1] ? partes[1].trim() : '', a.titulo, a.resp);
+                
+                let btnDel = document.querySelector('.btn-delete-fila');
+                if(btnDel) btnDel.classList.add('hidden'); // No permitir borrar la única fila al editar
+                
                 abrirModal('modal-actividad');
             }
         }
 
         function prepararNuevaActividad() {
             document.getElementById('act-id').value = '';
-            document.getElementById('act-hora-inicio').value = '';
-            document.getElementById('act-hora-fin').value = '';
-            document.getElementById('act-titulo').value = '';
-            document.getElementById('act-resp').value = 'Catequistas';
-            document.getElementById('titulo-modal-actividad').innerText = 'Programar Actividad';
+            document.getElementById('titulo-modal-actividad').innerText = 'Programar Múltiples Actividades';
+            document.getElementById('btn-add-fila').classList.remove('hidden');
+            document.getElementById('contenedor-filas-act').innerHTML = '';
+            
+            agregarFilaActividad('', '', '', 'Catequistas');
             abrirModal('modal-actividad');
         }
 
@@ -1430,6 +1456,7 @@
     </script>
 </body>
 </html>
+
 
 
 
