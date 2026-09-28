@@ -336,7 +336,7 @@
                     <label class="block font-bold text-slate-700 mb-1.5 text-xs uppercase">Contacto y WhatsApp</label>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <input type="text" id="j-contacto" required class="capitalized-text w-full p-3.5 rounded-2xl border outline-none shadow-inner text-xs" placeholder="Nombre Tutor">
-                        <input type="tel" id="j-celular" required class="capitalized-text w-full p-3.5 rounded-2xl border outline-none font-bold text-guindo shadow-inner text-xs" placeholder="72948392">
+                        <input type="tel" id="j-celular" required class=" w-full p-3.5 rounded-2xl border outline-none font-bold text-guindo shadow-inner text-xs" placeholder="72948392">
                     </div>
                 </div>
                 <div class="flex space-x-3 pt-3">
@@ -455,8 +455,8 @@
         <div class="bg-white rounded-[2rem] p-6 sm:p-8 max-w-md w-full shadow-2xl space-y-4 text-sm">
             <h3 class="text-lg font-black text-slate-900">Nueva Comisión</h3>
             <form onsubmit="guardarComision(event)" class="space-y-4">
-                <div><label class="block font-bold text-slate-700 mb-1.5 text-xs uppercase">Nombre</label><input type="text" id="com-nombre" required class="capitalized-text w-full p-3.5 rounded-2xl border outline-none shadow-inner" placeholder="Cocina"></div>
-                <div><label class="block font-bold text-slate-700 mb-1.5 text-xs uppercase">Encargados (separados por coma)</label><input type="text" id="com-encargados" required class="capitalized-text w-full p-3.5 rounded-2xl border outline-none shadow-inner" placeholder="María, Juan"></div>
+                <div><label class="block font-bold text-slate-700 mb-1.5 text-xs uppercase">Nombre</label><input type="text" id="com-nombre" required class=" w-full p-3.5 rounded-2xl border outline-none shadow-inner" placeholder="Cocina"></div>
+                <div><label class="block font-bold text-slate-700 mb-1.5 text-xs uppercase">Encargados (separados por coma)</label><input type="text" id="com-encargados" required class=" w-full p-3.5 rounded-2xl border outline-none shadow-inner" placeholder="María, Juan"></div>
                 <div class="flex space-x-3 pt-3">
                     <button type="button" onclick="cerrarModal('modal-comision')" class="w-1/2 bg-slate-100 hover:bg-slate-200 py-3.5 rounded-2xl font-bold text-slate-600 transition">Cancelar</button>
                     <button type="submit" class="w-1/2 bg-amber-600 hover:bg-amber-700 text-white py-3.5 rounded-2xl font-bold shadow-md transition">Crear</button>
@@ -470,8 +470,8 @@
             <h3 id="titulo-modal-expositor" class="text-lg font-black text-slate-900">Agregar Expositor</h3>
             <form onsubmit="guardarExpositor(event)" class="space-y-4">
                 <input type="hidden" id="exp-index" value="-1">
-                <div><label class="block font-bold text-slate-700 mb-1.5 text-xs uppercase">Nombre Completo</label><input type="text" id="exp-nombre" required class="capitalized-text w-full p-3.5 rounded-2xl border outline-none font-medium shadow-inner" placeholder="Padre Juan"></div>
-                <div><label class="block font-bold text-slate-700 mb-1.5 text-xs uppercase">Tema</label><input type="text" id="exp-tema" required class="capitalized-text w-full p-3.5 rounded-2xl border outline-none shadow-inner" placeholder="Eucaristía"></div>
+                <div><label class="block font-bold text-slate-700 mb-1.5 text-xs uppercase">Nombre Completo</label><input type="text" id="exp-nombre" required class=" w-full p-3.5 rounded-2xl border outline-none font-medium shadow-inner" placeholder="Padre Juan"></div>
+                <div><label class="block font-bold text-slate-700 mb-1.5 text-xs uppercase">Tema</label><input type="text" id="exp-tema" required class=" w-full p-3.5 rounded-2xl border outline-none shadow-inner" placeholder="Eucaristía"></div>
                 <div><label class="block font-bold text-slate-700 mb-1.5 text-xs uppercase">Foto</label><input type="file" id="exp-file" accept="image/*" class="w-full p-3 rounded-2xl border bg-slate-50 text-xs shadow-inner"></div>
                 <div class="flex space-x-3 pt-3">
                     <button type="button" onclick="cerrarModal('modal-expositor')" class="w-1/2 bg-slate-100 hover:bg-slate-200 py-3.5 rounded-2xl font-bold text-slate-600 transition">Cancelar</button>
@@ -486,7 +486,7 @@
             <h3 class="text-lg font-black text-slate-900">Registrar Gasto</h3>
             <form onsubmit="guardarGasto(event)" class="space-y-4">
                 <div><label class="block font-bold text-slate-700 mb-1.5 text-xs uppercase">Categoría</label><select id="gas-cat" class="w-full p-3.5 rounded-2xl border outline-none font-bold shadow-inner"><option value="Transporte">Transporte</option><option value="Alimentación">Alimentación</option><option value="Hospedaje">Hospedaje</option><option value="Otros">Otros</option></select></div>
-                <div><label class="block font-bold text-slate-700 mb-1.5 text-xs uppercase">Descripción</label><input type="text" id="gas-desc" required class="capitalized-text w-full p-3.5 rounded-2xl border outline-none shadow-inner" placeholder="Compra de víveres"></div>
+                <div><label class="block font-bold text-slate-700 mb-1.5 text-xs uppercase">Descripción</label><input type="text" id="gas-desc" required class=" w-full p-3.5 rounded-2xl border outline-none shadow-inner" placeholder="Compra de víveres"></div>
                 <div><label class="block font-bold text-slate-700 mb-1.5 text-xs uppercase">Monto (Bs)</label><input type="number" id="gas-monto" required class="w-full p-3.5 rounded-2xl border outline-none font-bold text-rose-600 text-sm shadow-inner" placeholder="500"></div>
                 <div class="flex space-x-3 pt-3">
                     <button type="button" onclick="cerrarModal('modal-gasto')" class="w-1/2 bg-slate-100 hover:bg-slate-200 py-3.5 rounded-2xl font-bold text-slate-600 transition">Cancelar</button>
@@ -964,8 +964,8 @@
                     <div><label class="block font-bold text-slate-500 mb-1 text-[10px] uppercase">Fin</label><input type="time" required value="${fin}" class="input-act-fin w-full p-2.5 rounded-xl border outline-none font-bold bg-slate-50 text-xs"></div>
                 </div>
                 <div class="space-y-3">
-                    <div><label class="block font-bold text-slate-500 mb-1 text-[10px] uppercase">Título de Actividad</label><input type="text" required value="${titulo}" class="input-act-titulo capitalized-text w-full p-2.5 rounded-xl border outline-none bg-slate-50 text-xs" placeholder="Ej: Oración de la mañana"></div>
-                    <div><label class="block font-bold text-slate-500 mb-1 text-[10px] uppercase">Responsable</label><input type="text" required value="${resp}" class="input-act-resp capitalized-text w-full p-2.5 rounded-xl border outline-none bg-slate-50 text-xs"></div>
+                    <div><label class="block font-bold text-slate-500 mb-1 text-[10px] uppercase">Título de Actividad</label><input type="text" required value="${titulo}" class="input-act-titulo w-full p-2.5 rounded-xl border outline-none bg-slate-50 text-xs" placeholder="Ej: Oración de la mañana"></div>
+                    <div><label class="block font-bold text-slate-500 mb-1 text-[10px] uppercase">Responsable</label><input type="text" required value="${resp}" class="input-act-resp w-full p-2.5 rounded-xl border outline-none bg-slate-50 text-xs"></div>
                 </div>
             `;
             container.appendChild(div);
@@ -1456,6 +1456,8 @@
     </script>
 </body>
 </html>
+
+
 
 
 
