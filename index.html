@@ -245,7 +245,7 @@
                     <h2 class="text-xl font-black text-slate-900">Comisiones</h2>
                     <p class="text-sm text-slate-500 mt-0.5">Distribución de equipos y responsabilidades de trabajo.</p>
                 </div>
-                <button id="btn-nueva-comision" onclick="abrirModal('modal-comision')" class="hidden bg-amber-600 hover:bg-amber-700 text-white font-bold px-5 py-3.5 rounded-2xl text-sm shadow-md transition flex items-center gap-2"><i class="fa-solid fa-users"></i> + Comisión</button>
+                <button id="btn-nueva-comision" onclick="prepararNuevaComision()" class="hidden bg-amber-600 hover:bg-amber-700 text-white font-bold px-5 py-3.5 rounded-2xl text-sm shadow-md transition flex items-center gap-2"><i class="fa-solid fa-users"></i> + Comisión</button>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="grid-comisiones"></div>
         </section>
@@ -452,14 +452,19 @@
 
     <!-- OTROS MODALES -->
     <div id="modal-comision" class="fixed inset-0 bg-slate-950/70 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
-        <div class="bg-white rounded-[2rem] p-6 sm:p-8 max-w-md w-full shadow-2xl space-y-4 text-sm">
-            <h3 class="text-lg font-black text-slate-900">Nueva Comisión</h3>
+        <div class="bg-white rounded-[2rem] p-6 sm:p-8 max-w-sm w-full shadow-2xl space-y-4 text-sm max-h-[90vh] overflow-y-auto">
+            <h3 id="titulo-modal-comision" class="text-lg font-black text-slate-900">Nueva Comisión</h3>
             <form onsubmit="guardarComision(event)" class="space-y-4">
-                <div><label class="block font-bold text-slate-700 mb-1.5 text-xs uppercase">Nombre</label><input type="text" id="com-nombre" required class=" w-full p-3.5 rounded-2xl border outline-none shadow-inner" placeholder="Cocina"></div>
-                <div><label class="block font-bold text-slate-700 mb-1.5 text-xs uppercase">Encargados (separados por coma)</label><input type="text" id="com-encargados" required class=" w-full p-3.5 rounded-2xl border outline-none shadow-inner" placeholder="María, Juan"></div>
+                <input type="hidden" id="com-id" value="">
+                <div><label class="block font-bold text-slate-700 mb-1.5 text-xs uppercase">Nombre de la Comisión</label><input type="text" id="com-nombre" required class="w-full p-3.5 rounded-2xl border outline-none shadow-inner" placeholder="Ej: Liturgia"></div>
+                <div><label class="block font-bold text-slate-700 mb-1.5 text-xs uppercase">Lderes / Encargados</label><input type="text" id="com-encargados" required class="w-full p-3.5 rounded-2xl border outline-none shadow-inner" placeholder="Mara, Juan"></div>
+                <div>
+                    <label class="block font-bold text-slate-700 mb-1.5 text-xs uppercase">Integrantes / Catequistas</label>
+                    <textarea id="com-integrantes" class="w-full p-3.5 rounded-2xl border outline-none shadow-inner resize-none h-24 text-sm leading-relaxed" placeholder="Escribe los nombres de los catequistas que conforman esta comisin (separados por comas o saltos de línea)"></textarea>
+                </div>
                 <div class="flex space-x-3 pt-3">
                     <button type="button" onclick="cerrarModal('modal-comision')" class="w-1/2 bg-slate-100 hover:bg-slate-200 py-3.5 rounded-2xl font-bold text-slate-600 transition">Cancelar</button>
-                    <button type="submit" class="w-1/2 bg-amber-600 hover:bg-amber-700 text-white py-3.5 rounded-2xl font-bold shadow-md transition">Crear</button>
+                    <button type="submit" class="w-1/2 bg-amber-600 hover:bg-amber-700 text-white py-3.5 rounded-2xl font-bold shadow-md transition">Guardar</button>
                 </div>
             </form>
         </div>
@@ -877,16 +882,55 @@
             }
         }
 
+        function prepararNuevaComision() {
+            document.getElementById('com-id').value = '';
+            document.getElementById('com-nombre').value = '';
+            document.getElementById('com-encargados').value = '';
+            document.getElementById('com-integrantes').value = '';
+            document.getElementById('titulo-modal-comision').innerText = 'Nueva Comisión';
+            abrirModal('modal-comision');
+        }
+
+        function editarComision(id) {
+            let c = baseDatos.comisiones.find(x => x.id === id);
+            if(c) {
+                document.getElementById('com-id').value = c.id;
+                document.getElementById('com-nombre').value = c.nombre;
+                document.getElementById('com-encargados').value = c.encargados;
+                document.getElementById('com-integrantes').value = c.integrantes || '';
+                document.getElementById('titulo-modal-comision').innerText = 'Editar Comisión';
+                abrirModal('modal-comision');
+            }
+        }
+
+        function eliminarComision(id) {
+            if(confirm('Seguro que deseas eliminar esta comisin?')) {
+                baseDatos.comisiones = baseDatos.comisiones.filter(x => x.id !== id);
+                guardarDatos();
+            }
+        }
+
         function guardarComision(e) {
             e.preventDefault();
+            let id = document.getElementById('com-id').value;
             let nombre = document.getElementById('com-nombre').value;
-            let encStr = document.getElementById('com-encargados').value;
-            let encargados = encStr.split(',').map(s => s.trim());
-            baseDatos.comisiones.push({ nombre, encargados });
+            let encargados = document.getElementById('com-encargados').value;
+            let integrantes = document.getElementById('com-integrantes').value;
+            
+            if(id) {
+                let c = baseDatos.comisiones.find(x => x.id === parseInt(id));
+                if(c) {
+                    c.nombre = nombre;
+                    c.encargados = encargados;
+                    c.integrantes = integrantes;
+                }
+            } else {
+                if(!baseDatos.comisiones) baseDatos.comisiones = [];
+                baseDatos.comisiones.push({ id: Date.now(), nombre, encargados, integrantes });
+            }
 
             guardarDatos().then(() => {
                 cerrarModal('modal-comision');
-                alert('✨ ¡Creación exitosa! Comisión creada.');
             });
         }
 
@@ -1254,16 +1298,49 @@
         }
 
         function renderizarComisiones() {
-            let rol = document.getElementById('select-rol').value;
-            let grid = document.getElementById('grid-comisiones');
-            grid.innerHTML = '';
-            (baseDatos.comisiones || []).forEach((c, index) => {
-                let encHtml = (c.encargados || []).map(en => `<div class="flex items-center space-x-2 py-1"><i class="fa-solid fa-user-check text-emerald-500"></i><span class="font-medium">${en}</span></div>`).join('');
-                let btnEliminar = rol === 'admin' ? `<button type="button" onclick="baseDatos.comisiones.splice(${index}, 1); guardarDatos();" class="text-rose-500 hover:text-rose-700 p-2 rounded-xl transition cursor-pointer"><i class="fa-solid fa-trash text-base"></i></button>` : '';
-                grid.innerHTML += `
-                    <div class="bg-white p-6 rounded-[2rem] shadow-sm border space-y-3 hover:shadow-md transition">
-                        <div class="flex justify-between items-center"><h3 class="font-black text-slate-900 text-sm flex items-center space-x-2"><i class="fa-solid fa-users text-guindo text-base"></i><span>${c.nombre}</span></h3>${btnEliminar}</div>
-                        <div class="bg-slate-50 p-4 rounded-2xl border text-xs space-y-1">${encHtml}</div>
+            let gridCom = document.getElementById('grid-comisiones');
+            if(!gridCom) return;
+            gridCom.innerHTML = '';
+            (baseDatos.comisiones || []).forEach(c => {
+                let initial = c.nombre ? c.nombre.charAt(0).toUpperCase() : '?';
+                let integrantesHtml = '';
+                if(c.integrantes && c.integrantes.trim() !== '') {
+                    integrantesHtml = `
+                        <div class="bg-slate-50 p-3 rounded-xl border mt-2">
+                            <p class="text-[10px] font-bold text-slate-400 uppercase mb-1">Integrantes (${c.integrantes.split(/,|\n/).filter(x=>x.trim()).length})</p>
+                            <p class="text-xs font-medium text-slate-600 leading-relaxed">${c.integrantes.replace(/\n/g, '<br>')}</p>
+                        </div>
+                    `;
+                }
+                
+                let botonesAdminCom = '';
+                let rol = document.getElementById('select-rol').value;
+                if(rol === 'admin') {
+                    botonesAdminCom = `
+                        <div class="absolute top-4 right-4 flex space-x-1">
+                            <button onclick="editarComision(${c.id})" class="text-indigo-400 hover:text-indigo-600 p-2"><i class="fa-solid fa-pen"></i></button>
+                            <button onclick="eliminarComision(${c.id})" class="text-rose-400 hover:text-rose-600 p-2"><i class="fa-solid fa-trash"></i></button>
+                        </div>
+                    `;
+                }
+                
+                let encargadosTexto = Array.isArray(c.encargados) ? c.encargados.join(', ') : c.encargados;
+
+                gridCom.innerHTML += `
+                    <div class="bg-white p-5 rounded-[2rem] shadow-sm border border-amber-100 hover:shadow-lg transition relative">
+                        ${botonesAdminCom}
+                        <div class="flex items-center space-x-4 mb-3 pr-10">
+                            <div class="w-12 h-12 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center font-black text-xl flex-shrink-0 shadow-inner">${initial}</div>
+                            <div>
+                                <h3 class="font-black text-slate-800 leading-tight">${c.nombre}</h3>
+                                <p class="text-[10px] text-amber-600 font-bold uppercase mt-0.5 tracking-wider">Comisión</p>
+                            </div>
+                        </div>
+                        <div class="bg-amber-50 p-3 rounded-xl border border-amber-100/50">
+                            <p class="text-[10px] font-bold text-amber-500 uppercase mb-0.5">Líderes / Encargados</p>
+                            <p class="text-sm font-black text-amber-900">${encargadosTexto}</p>
+                        </div>
+                        ${integrantesHtml}
                     </div>
                 `;
             });
@@ -1456,6 +1533,10 @@
     </script>
 </body>
 </html>
+
+
+
+
 
 
 
